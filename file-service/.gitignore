@@ -17,3 +17,5 @@ uploads/
 *.log
 
 
+
+/src/generated/prisma

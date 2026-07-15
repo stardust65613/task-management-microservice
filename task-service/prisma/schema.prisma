@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+model Task {
+
+  id String @id @default(uuid())
+
+
+  projectId String
+
+
+  // user tạo task
+  createdBy String
+
+
+  // user được assign
+  assigneeId String?
+
+
+  title String
+
+
+  description String?
+
+
+  status TaskStatus @default(TODO)
+
+
+  priority TaskPriority @default(MEDIUM)
+
+
+  dueDate DateTime?
+
+
+  comments Comment[]
+
+
+  attachments TaskAttachment[]
+
+
+  createdAt DateTime @default(now())
+
+
+  updatedAt DateTime @updatedAt
+
+
+
+  @@index([projectId])
+
+  @@index([assigneeId])
+
+  @@index([status])
+
+}
+
+
+
+model Comment {
+
+  id String @id @default(uuid())
+
+
+  taskId String
+
+
+  userId String
+
+
+  content String
+
+
+  createdAt DateTime @default(now())
+
+
+  updatedAt DateTime @updatedAt
+
+
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+
+  @@index([taskId])
+
+  @@index([userId])
+
+}
+
+
+
+model TaskAttachment {
+
+  id String @id @default(uuid())
+
+
+  taskId String
+
+
+  // fileId từ file-service
+  fileId String
+
+
+  uploadedBy String
+
+
+  createdAt DateTime @default(now())
+
+
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+
+  @@unique([taskId, fileId])
+
+
+  @@index([fileId])
+
+}
+
+
+
+enum TaskStatus {
+
+  TODO
+
+  IN_PROGRESS
+
+  REVIEW
+
+  DONE
+
+  CANCELLED
+
+}
+
+
+
+enum TaskPriority {
+
+  LOW
+
+  MEDIUM
+
+  HIGH
+
+  URGENT
+
+}

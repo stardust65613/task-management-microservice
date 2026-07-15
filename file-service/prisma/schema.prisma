@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+model File {
+
+  id String @id @default(uuid())
+
+
+  // userId từ auth-service
+  uploadedBy String
+
+
+  originalName String
+
+  fileName String
+
+
+  type FileType
+
+
+  mimeType String
+
+  size Int
+
+
+  bucket String
+
+
+  objectName String
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+
+
+  @@index([uploadedBy])
+
+  @@index([type])
+
+}
+
+
+enum FileType {
+
+  AVATAR
+
+  ATTACHMENT
+
+  IMAGE
+
+  PDF
+
+}

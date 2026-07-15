@@ -52,9 +52,7 @@ do
     mkdir -p "$SERVICE/uploads"
 
     mkdir -p "$SERVICE/logs"
-
-    mkdir -p "$SERVICE/prisma"
-
+    
 done
 
 #########################################
