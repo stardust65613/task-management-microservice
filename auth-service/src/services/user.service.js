@@ -18,7 +18,18 @@ const GetMyInformation = async (id) => {
     return await userRepository.findById(id);
 }
 
+const EditInfomation = async (id, data) => {
+    const { username, firstname, lastname } = data;
+
+    if (!username){
+        throw new Error("Username must not be null.")
+    }
+
+    return await userRepository.updateUser(id, {username, firstname, lastname,});
+}
+
 module.exports = {
     GetMyInformation,
-    GetUserInformation
+    GetUserInformation,
+    EditInfomation
 }

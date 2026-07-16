@@ -28,7 +28,22 @@ const GetUserInfo = async (req, res, next) => {
     }
 }
 
+const EditInformation = async (req, res, next) => {
+    try {
+        const result = await userService.EditInfomation(req.user.id, req.body);
+
+        return res.status(200).json({
+            success: true,
+            message: "Edit user's info successfully",
+            data: result,
+        });
+    } catch (err) {
+        next(err);
+    }
+}
+
 module.exports = {
     GetMyInfo,
-    GetUserInfo
+    GetUserInfo,
+    EditInformation
 }

@@ -10,4 +10,6 @@ router.get("/me", authenticate, userController.GetMyInfo);
 
 router.get("/:id", authenticate, userController.GetUserInfo);
 
+router.put("/me", authenticate, userController.EditInformation);
+
 module.exports = router;
