@@ -73,3 +73,44 @@ task-management/
 ├── docker-compose.yml
 ├── README.md
 └── .gitignore
+
+### Đổi client
+
+Quy trình nên làm:
+
+Sửa schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+Xóa:
+src/generated/
+Chạy
+npm install @prisma/client
+Chạy
+npx prisma generate
+
+Lệnh này chỉ generate Prisma Client, không đụng database.
+
+Cài PostgreSQL adapter
+npm install @prisma/adapter-pg pg
+
+### /src/lib/prisma.js
+
+```
+const { PrismaClient } = require("@prisma/client");
+const { PrismaPg } = require("@prisma/adapter-pg");
+
+const adapter = new PrismaPg({
+    connectionString: process.env.DATABASE_URL,
+});
+
+const prisma = new PrismaClient({
+    adapter,
+});
+
+module.exports = prisma;
+```
+
+### migration dùng
+npx prisma migrate dev --name init
+
