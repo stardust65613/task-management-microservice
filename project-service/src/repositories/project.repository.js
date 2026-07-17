@@ -6,6 +6,35 @@ async function create(data) {
     });
 }
 
+const createProject = async (data) => {
+    return await prisma.$transaction(async (tx) => {
+        const project = await tx.project.create({
+            data: {
+                name: data.name,
+                description: data.description,
+                ownerId: data.ownerId,
+                visibility: data.visibility,
+            },
+        });
+
+        await tx.projectMember.create({
+            data: {
+                projectId: project.id,
+                userId: data.ownerId,
+                role: "OWNER",
+            },
+        });
+
+        await tx.projectSetting.create({
+            data: {
+                projectId: project.id,
+            },
+        });
+
+        return project;
+    });
+};
+
 async function findById(id) {
     return prisma.project.findUnique({
         where: {
@@ -61,4 +90,5 @@ module.exports = {
     findAll,
     update,
     remove,
+    createProject,
 };

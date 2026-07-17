@@ -25,11 +25,27 @@ const EditInfomation = async (id, data) => {
         throw new Error("Username must not be null.")
     }
 
-    return await userRepository.updateUser(id, {username, firstname, lastname,});
+    try {
+        return await userRepository.updateUser(id, { username, firstname, lastname ,});
+    } catch (error) {
+        if (error.code === "P2025") {
+            throw new Error("User not found");
+        }
+        throw error;
+    }
 }
+
+const CheckUserExists = async (id) => {
+    const user = await userRepository.findById(id);
+
+    return {
+        exists: !!user,
+    };
+};
 
 module.exports = {
     GetMyInformation,
     GetUserInformation,
-    EditInfomation
+    EditInfomation,
+    CheckUserExists
 }
