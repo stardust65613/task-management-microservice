@@ -27,6 +27,13 @@ const startRPCServer = async () => {
 
                 break;
 
+            case "GET_USERS_BY_IDS":
+                response = await userService.getUsersByIds(
+                    request.data.userIds
+                );
+                
+                break;
+
             default:
 
                 response = {

@@ -43,9 +43,19 @@ const CheckUserExists = async (id) => {
     };
 };
 
+async function getUsersByIds(userIds) {
+    const users = await userRepository.findByIds(userIds);
+
+    return {
+        success: true,
+        data: users,
+    };
+}
+
 module.exports = {
     GetMyInformation,
     GetUserInformation,
     EditInfomation,
-    CheckUserExists
+    CheckUserExists,
+    getUsersByIds
 }

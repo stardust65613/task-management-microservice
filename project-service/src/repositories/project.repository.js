@@ -83,6 +83,29 @@ async function remove(id) {
     });
 }
 
+async function GetAllProjectsJoined(userId){
+    const projects = await prisma.project.findMany({
+        where: {
+            members: {
+                some: {
+                    userId,
+                },
+            },
+        },
+        include: {
+            members: {
+                where: {
+                    userId,
+                },
+                select: {
+                    role: true,
+                    joinedAt: true,
+                },
+            },
+        },
+    });
+}
+
 module.exports = {
     create,
     findById,
@@ -91,4 +114,5 @@ module.exports = {
     update,
     remove,
     createProject,
+    GetAllProjectsJoined,
 };
