@@ -28,10 +28,10 @@ const CreateProject = async (id, data) => {
     } catch (error) {
         throw error;
     }
-}
+};
 
-const UpdateProject = async (id, data) => {
-    const {name, description, visibility, status, projectId} = data;
+const UpdateProject = async (id, projectId, data) => {
+    const {name, description, visibility, status} = data;
 
     if (!name){
         throw new Error("Project's name must not be null.");
@@ -69,17 +69,15 @@ const UpdateProject = async (id, data) => {
     }
 
     return await projectRepository.update(projectId, {name, description, visibility,});
-}
+};
 
 const GetProjectsByUser = async (id) => {
     const project = await projectRepository.GetAllProjectsJoined(id);
 
     return project;
-}
+};
 
-const GetProject = async (id, data) => {
-    const { projectId } = data;
-
+const GetProject = async (id, projectId) => {
     if (!projectId) {
         throw new Error("Invalid project Id");
     }
@@ -99,11 +97,9 @@ const GetProject = async (id, data) => {
     /// Thêm code lấy các task của project rồi map vào project để hiển thị.
 
     return project;
-}
+};
 
-const DeleteProject = async (id, data) => {
-    const { projectId } = data;
-
+const DeleteProject = async (id, projectId) => {
     const project = await projectRepository.findById(projectId);
 
     if (!project) {
@@ -117,7 +113,7 @@ const DeleteProject = async (id, data) => {
     /// Thêm code xóa các task trong project
 
     return await projectRepository.remove(projectId);
-}
+};
 
 module.exports = {
     CreateProject,

@@ -2,7 +2,7 @@ const userService = require("../services/user.service");
 
 const GetMyInfo = async (req, res, next) => {
     try {
-        const result = await userService.GetMyInformation(req.user.id)
+        const result = await userService.GetMyInformation(req.user.id);
 
         return res.status(200).json({
             success: true,
@@ -16,7 +16,7 @@ const GetMyInfo = async (req, res, next) => {
 
 const GetUserInfo = async (req, res, next) => {
     try {
-        const result = await userService.GetMyInformation(req.params.id)
+        const result = await userService.GetMyInformation(req.params.id);
 
         return res.status(200).json({
             success: true,
@@ -26,7 +26,7 @@ const GetUserInfo = async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-}
+};
 
 const EditInformation = async (req, res, next) => {
     try {
@@ -40,7 +40,7 @@ const EditInformation = async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-}
+};
 
 module.exports = {
     GetMyInfo,

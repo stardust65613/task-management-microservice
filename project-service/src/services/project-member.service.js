@@ -4,8 +4,8 @@ const projectSettingRepository = require("../repositories/project-setting.reposi
 const { request } = require("../rabbitmq/rpcClient");
 const { ProjectMemberRole, ProjectStatus } = require("@prisma/client");
 
-const AddMember = async (id, data) => {
-    const { userId, projectId } = data;
+const AddMember = async (id, projectId, data) => {
+    const { userId } = data;
 
     if (!userId){
         throw new Error("Invaid user Id");
@@ -49,11 +49,9 @@ const AddMember = async (id, data) => {
     }
 
     return await projectMemberRepository.create({ userId, projectId, });
-}
+};
 
-const RemoveMember = async (id, data) => {
-    const { userId, projectId } = data;
-
+const RemoveMember = async (id, projectId, userId) => {
     if (!userId){
         throw new Error("Invaid user Id");
     }
@@ -89,10 +87,10 @@ const RemoveMember = async (id, data) => {
     }
 
     return await projectMemberRepository.remove(projectMember.id);
-}
+};
 
-const UpdateMemberRole = async (id, data) => {
-    const { userId, projectId, role } = data;
+const UpdateMemberRole = async (id, projectId, userId) => {
+    const { role } = data;
 
     if (!userId){
         throw new Error("Invaid user Id");
@@ -133,11 +131,9 @@ const UpdateMemberRole = async (id, data) => {
     }
 
     return await projectMemberRepository.updateRole(projectMember.id, role);
-}
+};
 
-const GetMembersOfProject = async (id, data) => {
-    const { projectId } = data;
-
+const GetMembersOfProject = async (id, projectId) => {
     if (!projectId) {
         throw new Error("Invalid project Id");
     }
@@ -171,17 +167,15 @@ const GetMembersOfProject = async (id, data) => {
     }));
 
     return result;
-}
+};
 
-const GetCollabProject = async (id, data) => {
-    const { userId } = data;
-
+const GetCollabProject = async (id, userId) => {
     if (!userId){
         throw new Error("Invaid user Id");
     }
 
     return await projectMemberRepository.GetCollabProject(id, userId);
-}
+};
 
 module.exports = {
     AddMember,
