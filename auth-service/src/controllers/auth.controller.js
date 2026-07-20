@@ -16,7 +16,7 @@ const register = async (req, res, next) => {
 
 const login = async (req, res, next) => {
     try {
-        const result = await authService.login(req.body)
+        const result = await authService.login(req.body);
 
         return res.status(200).json({
             success: true,
@@ -26,11 +26,11 @@ const login = async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-}
+};
 
 const RefreshToken = async (req, res, next) => {
     try {
-        const result = await authService.RefreshAccessToken(req.body.refreshToken)
+        const result = await authService.RefreshAccessToken(req.body.refreshToken);
 
         return res.status(200).json({
             success: true,
@@ -40,7 +40,7 @@ const RefreshToken = async (req, res, next) => {
     } catch (err) {
         next(err);
     }
-}
+};
 
 const logout = async (req, res, next) => {
     try {

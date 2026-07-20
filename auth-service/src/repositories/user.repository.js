@@ -39,10 +39,26 @@ async function deleteUser(id) {
     });
 }
 
+async function findByIds(userIds) {
+    return prisma.user.findMany({
+        where: {
+            id: {
+                in: userIds,
+            },
+        },
+        select: {
+            id: true,
+            username: true,
+            avatar: true,
+        },
+    });
+}
+
 module.exports = {
     findByEmail,
     createUser,
     findById,
     updateUser,
     deleteUser,
+    findByIds
 };

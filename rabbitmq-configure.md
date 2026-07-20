@@ -1,135 +1,24 @@
-### Gateway
-npm install express dotenv cors helmet morgan axios express-rate-limit http-proxy-middleware jsonwebtoken
+# RabbitMQ trong Microservice
 
-npm install -D nodemon eslint prettier
+## Event vs RPC
 
-### Auth
-npm install express dotenv cors helmet morgan bcrypt jsonwebtoken cookie-parser zod axios @prisma/client
+**Event:** dùng publisher + consumer + exchange
 
-npm install prisma -D
-
-npm install -D nodemon eslint prettier
-### Project
-npm install express dotenv cors helmet morgan jsonwebtoken zod axios @prisma/client
-
-npm install prisma -D
-
-npm install -D nodemon eslint prettier
-
-### Task
-npm install express dotenv cors helmet morgan jsonwebtoken zod socket.io amqplib uuid axios @prisma/client
-
-npm install multer
-
-npm install prisma -D
-
-npm install -D nodemon eslint prettier
-
-### Notification
-
-npm install express dotenv cors helmet morgan socket.io nodemailer amqplib @prisma/client
-
-npm install prisma -D
-
-npm install -D nodemon eslint prettier
-
-### File
- 
-npm install express dotenv cors helmet morgan multer uuid @prisma/client
-
-npm install minio
-
-npm install prisma -D
-
-npm install -D nodemon eslint prettier
-
-### Frontend 
-npm install
-
-npm install vue-router pinia axios socket.io-client vue-toastification@next @vueuse/core
-
-npm install -D tailwindcss @tailwindcss/vite
-
-task-management/
-│
-├── scripts/
-│   ├── bootstrap.sh          # Chạy toàn bộ bootstrap
-│   ├── create-structure.sh   # Tạo cấu trúc thư mục
-│   ├── create-backend.sh     # Tạo file backend
-│   ├── create-frontend.sh    # Tạo file frontend
-│   ├── create-env.sh         # Tạo .env.example
-│   ├── create-docker.sh      # Tạo Dockerfile + docker-compose
-│   ├── create-readme.sh      # Tạo README.md
-│   └── create-gitignore.sh   # Tạo .gitignore
-│
-├── gateway/
-├── auth-service/
-├── project-service/
-├── task-service/
-├── notification-service/
-├── file-service/
-├── frontend/
-│
-├── docker-compose.yml
-├── README.md
-└── .gitignore
-
-### Đổi client
-
-Quy trình nên làm:
-
-Sửa schema.prisma
-generator client {
-  provider = "prisma-client-js"
-}
-Xóa:
-src/generated/
-Chạy
-npm install @prisma/client
-Chạy
-npx prisma generate
-
-Lệnh này chỉ generate Prisma Client, không đụng database.
-
-Cài PostgreSQL adapter
-npm install @prisma/adapter-pg pg
-
-### /src/lib/prisma.js
-
-```
-const { PrismaClient } = require("@prisma/client");
-const { PrismaPg } = require("@prisma/adapter-pg");
-
-const adapter = new PrismaPg({
-    connectionString: process.env.DATABASE_URL,
-});
-
-const prisma = new PrismaClient({
-    adapter,
-});
-
-module.exports = prisma;
-```
-
-### migration dùng
-npx prisma migrate dev --name init
-
-####
---------------------------------------------------------------------------------------------
-RabbitMQ 
---------------------------------------------------------------------------------------------
-
-
-Event: dùng publisher + consumer + exchange
 Ví dụ: Project tạo → Notification gửi email.
-RPC: dùng rpcClient + rpcServer
+
+**RPC:** dùng rpcClient + rpcServer
+
 Ví dụ: Project hỏi Auth "user này tồn tại không?"
-1. Cấu trúc thư mục
+
+---
+
+# 1. Cấu trúc thư mục
 
 Mỗi service có thư mục RabbitMQ riêng:
 
 Ví dụ:
 
+```text
 project-service/
 └── src/
     ├── rabbitmq/
@@ -144,9 +33,11 @@ project-service/
     ├── controllers/
     ├── repositories/
     └── server.js
+```
 
 Auth Service thêm:
 
+```text
 auth-service/
 └── src/
     └── rabbitmq/
@@ -154,25 +45,37 @@ auth-service/
         ├── rpcServer.js
         ├── publisher.js
         └── constants.js
-2. .env
+```
+
+---
+
+# 2. `.env`
 
 Mỗi service:
 
+```env
 RABBITMQ_URL=amqp://guest:guest@localhost:5672
-3. connection.js
-File:
-src/rabbitmq/connection.js
+```
 
-Nhiệm vụ:
+---
 
-Connect RabbitMQ.
-Tạo Channel.
-Export channel cho các file khác dùng.
+# 3. `connection.js`
+
+**File:**
+
+`src/rabbitmq/connection.js`
+
+### Nhiệm vụ
+
+- Connect RabbitMQ.
+- Tạo Channel.
+- Export channel cho các file khác dùng.
+
+```javascript
 const amqp = require("amqplib");
 
 let connection = null;
 let channel = null;
-
 
 const connectRabbitMQ = async () => {
 
@@ -180,16 +83,13 @@ const connectRabbitMQ = async () => {
         return;
     }
 
-
     connection = await amqp.connect(
         process.env.RABBITMQ_URL
     );
 
-
     connection.on("error", (err)=>{
         console.log("RabbitMQ error:", err);
     });
-
 
     connection.on("close", ()=>{
         console.log("RabbitMQ closed");
@@ -197,15 +97,11 @@ const connectRabbitMQ = async () => {
         channel = null;
     });
 
-
     channel = await connection.createChannel();
-
 
     console.log("RabbitMQ connected");
 
 };
-
-
 
 const getChannel = () => {
 
@@ -218,20 +114,24 @@ const getChannel = () => {
     return channel;
 };
 
-
-
 module.exports = {
     connectRabbitMQ,
     getChannel
 };
-4. constants.js
-File:
-src/rabbitmq/constants.js
+```
+
+---
+
+# 4. `constants.js`
+
+**File:**
+
+`src/rabbitmq/constants.js`
 
 Quản lý tên:
 
+```javascript
 module.exports = {
-
 
     exchanges: {
 
@@ -243,7 +143,6 @@ module.exports = {
 
     },
 
-
     routingKeys: {
 
         PROJECT_CREATED:
@@ -253,7 +152,6 @@ module.exports = {
             "task.created"
 
     },
-
 
     queues: {
 
@@ -266,18 +164,28 @@ module.exports = {
     }
 
 };
-PHẦN A: EVENT SYSTEM
-5. publisher.js
-File:
-src/rabbitmq/publisher.js
+```
+
+---
+
+# PHẦN A: EVENT SYSTEM
+
+---
+
+# 5. `publisher.js`
+
+**File:**
+
+`src/rabbitmq/publisher.js`
 
 Dùng khi service phát event.
 
 Ví dụ:
 
 Project created
-const { getChannel } = require("./connection");
 
+```javascript
+const { getChannel } = require("./connection");
 
 const publish = async (
     exchange,
@@ -285,9 +193,7 @@ const publish = async (
     message
 )=>{
 
-
     const channel = getChannel();
-
 
     await channel.assertExchange(
         exchange,
@@ -296,7 +202,6 @@ const publish = async (
             durable:true
         }
     );
-
 
     channel.publish(
         exchange,
@@ -308,28 +213,26 @@ const publish = async (
 
 };
 
-
-
 module.exports = {
     publish
 };
-Cách dùng publisher
+```
+
+### Cách dùng publisher
 
 Ví dụ:
 
-project.service.js
+`project.service.js`
+
+```javascript
 const {
     publish
 }=require("../rabbitmq/publisher");
 
-
 const createProject = async(data)=>{
-
 
     const project =
         await projectRepository.create(data);
-
-
 
     await publish(
 
@@ -341,13 +244,14 @@ const createProject = async(data)=>{
 
     );
 
-
     return project;
 
 };
+```
 
-Flow:
+### Flow
 
+```text
 HTTP
  |
 Controller
@@ -359,18 +263,25 @@ Repository
 Publisher
  |
 RabbitMQ
-6. consumer.js
-File:
-src/rabbitmq/consumer.js
+```
 
-Nhiệm vụ:
+---
 
-Bind queue vào exchange.
-Nhận event.
+# 6. `consumer.js`
+
+**File:**
+
+`src/rabbitmq/consumer.js`
+
+### Nhiệm vụ
+
+- Bind queue vào exchange.
+- Nhận event.
+
+```javascript
 const {
     getChannel
 }=require("./connection");
-
 
 const consume = async(
     exchange,
@@ -379,10 +290,7 @@ const consume = async(
     handler
 )=>{
 
-
 const channel=getChannel();
-
-
 
 await channel.assertExchange(
     exchange,
@@ -392,8 +300,6 @@ await channel.assertExchange(
     }
 );
 
-
-
 await channel.assertQueue(
     queue,
     {
@@ -401,67 +307,59 @@ await channel.assertQueue(
     }
 );
 
-
-
 await channel.bindQueue(
     queue,
     exchange,
     routingKey
 );
 
-
-
 channel.consume(
     queue,
     async(msg)=>{
 
-
         if(!msg)
             return;
-
 
         const data =
             JSON.parse(
                 msg.content.toString()
             );
 
-
         await handler(data);
-
 
         channel.ack(msg);
 
     }
 );
 
-
 };
-
-
 
 module.exports={
     consume
 };
-7. registerConsumers.js
-File:
-src/rabbitmq/registerConsumers.js
+```
+
+---
+
+# 7. `registerConsumers.js`
+
+**File:**
+
+`src/rabbitmq/registerConsumers.js`
 
 Nơi khai báo service nghe event nào.
 
 Ví dụ Notification Service:
 
+```javascript
 const {
     consume
 }=require("./consumer");
 
-
 const notificationService =
 require("../services/notification.service");
 
-
-
 const startConsumers = async()=>{
-
 
 await consume(
 
@@ -475,38 +373,40 @@ await consume(
 
 );
 
-
 };
-
-
 
 module.exports={
     startConsumers
 };
-PHẦN B: RPC SYSTEM
-8. rpcServer.js (Auth Service)
-File:
-auth-service/src/rabbitmq/rpcServer.js
+```
+
+---
+
+# PHẦN B: RPC SYSTEM
+
+---
+
+# 8. `rpcServer.js` (Auth Service)
+
+**File:**
+
+`auth-service/src/rabbitmq/rpcServer.js`
 
 Auth lắng nghe:
 
-auth.rpc
+`auth.rpc`
+
+```javascript
 const {
     getChannel
 }=require("./connection");
 
-
 const userService =
 require("../services/user.service");
 
-
-
 const startRPCServer = async()=>{
 
-
 const channel=getChannel();
-
-
 
 await channel.assertQueue(
     "auth.rpc",
@@ -515,26 +415,18 @@ await channel.assertQueue(
     }
 );
 
-
-
 channel.consume(
 "auth.rpc",
 async(msg)=>{
-
 
 const request =
 JSON.parse(
 msg.content.toString()
 );
 
-
-
 let response;
 
-
-
 switch(request.action){
-
 
 case "CHECK_USER":
 
@@ -545,8 +437,6 @@ await userService.checkUserExists(
 
 break;
 
-
-
 default:
 
 response={
@@ -555,8 +445,6 @@ response={
 };
 
 }
-
-
 
 channel.sendToQueue(
 
@@ -573,43 +461,40 @@ msg.properties.correlationId
 
 );
 
-
-
 channel.ack(msg);
-
 
 });
 
 };
 
-
-
 module.exports={
     startRPCServer
 };
-9. rpcClient.js (Project Service)
-File:
-project-service/src/rabbitmq/rpcClient.js
+```
+
+---
+
+# 9. `rpcClient.js` (Project Service)
+
+**File:**
+
+`project-service/src/rabbitmq/rpcClient.js`
+
+```javascript
 const {
     getChannel
 }=require("./connection");
 
-
 const {
     randomUUID
 }=require("crypto");
-
-
 
 const request = async(
 queue,
 payload
 )=>{
 
-
 const channel=getChannel();
-
-
 
 const replyQueue =
 await channel.assertQueue(
@@ -619,22 +504,16 @@ exclusive:true
 }
 );
 
-
-
 const correlationId =
 randomUUID();
 
-
-
 return new Promise(
 (resolve)=>{
-
 
 channel.consume(
 replyQueue.queue,
 
 (msg)=>{
-
 
 if(
 msg.properties.correlationId
@@ -642,16 +521,13 @@ msg.properties.correlationId
 correlationId
 ){
 
-
 resolve(
 JSON.parse(
 msg.content.toString()
 )
 );
 
-
 }
-
 
 },
 
@@ -660,8 +536,6 @@ noAck:true
 }
 
 );
-
-
 
 channel.sendToQueue(
 
@@ -682,31 +556,27 @@ correlationId
 
 );
 
-
-
 });
 
-
 };
-
-
 
 module.exports={
 request
 };
-Cách gọi RPC
+```
+
+### Cách gọi RPC
 
 Trong:
 
-project.service.js
+`project.service.js`
+
+```javascript
 const {
 request
 }=require("../rabbitmq/rpcClient");
 
-
-
 const addMember = async(userId)=>{
-
 
 const result =
 await request(
@@ -725,8 +595,6 @@ data:{
 
 );
 
-
-
 if(!result.exists){
 
 throw new Error(
@@ -735,57 +603,66 @@ throw new Error(
 
 }
 
-
 };
-10. server.js khởi động
-Auth Service
+```
+
+---
+
+# 10. `server.js` khởi động
+
+## Auth Service
+
+```javascript
 const {
 connectRabbitMQ
 }=require("./rabbitmq/connection");
-
 
 const {
 startRPCServer
 }=require("./rabbitmq/rpcServer");
 
-
-
 async function bootstrap(){
-
 
 await connectRabbitMQ();
 
-
 await startRPCServer();
-
-
 
 app.listen(PORT);
 
 }
 
-
 bootstrap();
-Project Service
-await connectRabbitMQ();
+```
 
+## Project Service
+
+```javascript
+await connectRabbitMQ();
 
 await startConsumers();
 
-
 app.listen(PORT);
-Tổng kết vai trò file
-File	Vai trò
-connection.js	Kết nối RabbitMQ + tạo channel
-publisher.js	Gửi event
-consumer.js	Nhận event
-registerConsumers.js	Đăng ký service nghe event nào
-rpcClient.js	Gửi request và chờ response
-rpcServer.js	Nhận RPC và trả kết quả
-constants.js	Lưu exchange, queue, routing key
+```
 
-Với kiến trúc task-management của bạn:
+---
 
+# Tổng kết vai trò file
+
+| File | Vai trò |
+|------|----------|
+| `connection.js` | Kết nối RabbitMQ + tạo channel |
+| `publisher.js` | Gửi event |
+| `consumer.js` | Nhận event |
+| `registerConsumers.js` | Đăng ký service nghe event nào |
+| `rpcClient.js` | Gửi request và chờ response |
+| `rpcServer.js` | Nhận RPC và trả kết quả |
+| `constants.js` | Lưu exchange, queue, routing key |
+
+---
+
+# Kiến trúc tổng thể
+
+```text
 Project Service
     |
     |-- RPC --> Auth Service
@@ -797,5 +674,6 @@ Project Service
 Task Service
     |
     |-- Event --> Notification
+```
 
 Đây là cấu trúc đủ để triển khai RabbitMQ trong một hệ thống microservice thực tế.

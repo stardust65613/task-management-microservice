@@ -6,6 +6,35 @@ async function create(data) {
     });
 }
 
+const createProject = async (data) => {
+    return await prisma.$transaction(async (tx) => {
+        const project = await tx.project.create({
+            data: {
+                name: data.name,
+                description: data.description,
+                ownerId: data.ownerId,
+                visibility: data.visibility,
+            },
+        });
+
+        await tx.projectMember.create({
+            data: {
+                projectId: project.id,
+                userId: data.ownerId,
+                role: "OWNER",
+            },
+        });
+
+        await tx.projectSetting.create({
+            data: {
+                projectId: project.id,
+            },
+        });
+
+        return project;
+    });
+};
+
 async function findById(id) {
     return prisma.project.findUnique({
         where: {
@@ -54,6 +83,31 @@ async function remove(id) {
     });
 }
 
+async function GetAllProjectsJoined(userId){
+    const projects = await prisma.project.findMany({
+        where: {
+            members: {
+                some: {
+                    userId,
+                },
+            },
+        },
+        include: {
+            members: {
+                where: {
+                    userId,
+                },
+                select: {
+                    role: true,
+                    joinedAt: true,
+                },
+            },
+        },
+    });
+
+    return projects;
+}
+
 module.exports = {
     create,
     findById,
@@ -61,4 +115,6 @@ module.exports = {
     findAll,
     update,
     remove,
+    createProject,
+    GetAllProjectsJoined,
 };

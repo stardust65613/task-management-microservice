@@ -52,6 +52,50 @@ async function remove(id) {
     });
 }
 
+async function RemoveMember(projectId, userId) {
+    projectMember = prisma.projectMember.findUnique({
+        where: {
+            projectId_userId: {
+                projectId,
+                userId,
+            },
+        },
+    });
+
+    id = projectMember.id;
+
+    return prisma.projectMember.delete({
+        where: {
+            id,
+        },
+    });
+}
+
+async function GetCollabProject(userId_1, userId_2){
+    const projects = await prisma.project.findMany({
+        where: {
+            members: {
+                some: {
+                    userId: userId_1,
+                },
+            },
+            AND: {
+                members: {
+                    some: {
+                        userId: userId_2,
+                    },
+                },
+            },
+        },
+        select: {
+            id: true,
+            name: true,
+        },
+    });
+
+    return projects;
+}
+
 module.exports = {
     create,
     find,
@@ -59,4 +103,6 @@ module.exports = {
     findByUserId,
     updateRole,
     remove,
+    RemoveMember,
+    GetCollabProject
 };
