@@ -397,78 +397,50 @@ Auth lắng nghe:
 `auth.rpc`
 
 ```javascript
-const {
-    getChannel
-}=require("./connection");
+const { getChannel } = require("./connection");
 
-const userService =
-require("../services/user.service");
+const userService = require("../services/user.service");
 
-const startRPCServer = async()=>{
+const startRPCServer = async () => {
+    const channel = getChannel();
 
-const channel=getChannel();
+    await channel.assertQueue("auth.rpc", {
+        durable: true,
+    });
 
-await channel.assertQueue(
-    "auth.rpc",
-    {
-        durable:true
-    }
-);
+    channel.consume("auth.rpc", async (msg) => {
+        const request = JSON.parse(msg.content.toString());
 
-channel.consume(
-"auth.rpc",
-async(msg)=>{
+        let response;
 
-const request =
-JSON.parse(
-msg.content.toString()
-);
+        switch (request.action) {
+            case "CHECK_USER":
+                response = await userService.checkUserExists(
+                    request.data.userId
+                );
+                break;
 
-let response;
+            default:
+                response = {
+                    success: false,
+                    message: "Unknown action",
+                };
+        }
 
-switch(request.action){
+        channel.sendToQueue(
+            msg.properties.replyTo,
+            Buffer.from(JSON.stringify(response)),
+            {
+                correlationId: msg.properties.correlationId,
+            }
+        );
 
-case "CHECK_USER":
-
-response =
-await userService.checkUserExists(
-    request.data.userId
-);
-
-break;
-
-default:
-
-response={
-    success:false,
-    message:"Unknown action"
+        channel.ack(msg);
+    });
 };
 
-}
-
-channel.sendToQueue(
-
-msg.properties.replyTo,
-
-Buffer.from(
-JSON.stringify(response)
-),
-
-{
-correlationId:
-msg.properties.correlationId
-}
-
-);
-
-channel.ack(msg);
-
-});
-
-};
-
-module.exports={
-    startRPCServer
+module.exports = {
+    startRPCServer,
 };
 ```
 
@@ -481,87 +453,56 @@ module.exports={
 `project-service/src/rabbitmq/rpcClient.js`
 
 ```javascript
-const {
-    getChannel
-}=require("./connection");
+const { getChannel } = require("./connection");
+const { randomUUID } = require("crypto");
 
-const {
-    randomUUID
-}=require("crypto");
+const request = async (queue, payload) => {
 
-const request = async(
-queue,
-payload
-)=>{
+    const channel = getChannel();
 
-const channel=getChannel();
+    const replyQueue = await channel.assertQueue("", {
+        exclusive: true
+    });
 
-const replyQueue =
-await channel.assertQueue(
-"",
-{
-exclusive:true
-}
-);
+    const correlationId = randomUUID();
 
-const correlationId =
-randomUUID();
+    return new Promise((resolve) => {
 
-return new Promise(
-(resolve)=>{
+        channel.consume(
+            replyQueue.queue,
+            (msg) => {
 
-channel.consume(
-replyQueue.queue,
+                if (
+                    msg.properties.correlationId === correlationId
+                ) {
+                    resolve(
+                        JSON.parse(
+                            msg.content.toString()
+                        )
+                    );
+                }
 
-(msg)=>{
+            },
+            {
+                noAck: true
+            }
+        );
 
-if(
-msg.properties.correlationId
-===
-correlationId
-){
+        channel.sendToQueue(
+            queue,
+            Buffer.from(JSON.stringify(payload)),
+            {
+                correlationId,
+                replyTo: replyQueue.queue
+            }
+        );
 
-resolve(
-JSON.parse(
-msg.content.toString()
-)
-);
-
-}
-
-},
-
-{
-noAck:true
-}
-
-);
-
-channel.sendToQueue(
-
-queue,
-
-Buffer.from(
-JSON.stringify(payload)
-),
-
-{
-
-replyTo:
-replyQueue.queue,
-
-correlationId
-
-}
-
-);
-
-});
+    });
 
 };
 
-module.exports={
-request
+module.exports = {
+    request
 };
 ```
 
@@ -572,37 +513,21 @@ Trong:
 `project.service.js`
 
 ```javascript
-const {
-request
-}=require("../rabbitmq/rpcClient");
+const { request } = require("../rabbitmq/rpcClient");
 
 const addMember = async(userId)=>{
+    const result = await request("auth.rpc", {
+        action: "CHECK_USER",
+        data:{
+            userId
+        }
+    });
 
-const result =
-await request(
+    if (!result.exists) {
+        throw new Error("User does not exist");
+    }
 
-"auth.rpc",
-
-{
-
-action:"CHECK_USER",
-
-data:{
-    userId
-}
-
-}
-
-);
-
-if(!result.exists){
-
-throw new Error(
-"User not found"
-);
-
-}
-
+    return await projectMemberRepository.create({ userId, projectId, });
 };
 ```
 
@@ -613,35 +538,55 @@ throw new Error(
 ## Auth Service
 
 ```javascript
-const {
-connectRabbitMQ
-}=require("./rabbitmq/connection");
+require("dotenv").config();
 
-const {
-startRPCServer
-}=require("./rabbitmq/rpcServer");
+const app = require("./app");
+const { connectRabbitMQ } = require("./rabbitmq/connection");
+const { startRPCServer } = require("./rabbitmq/rpcServer");
 
-async function bootstrap(){
+const PORT = process.env.PORT || 3002;
 
-await connectRabbitMQ();
+async function startServer() {
+    await connectRabbitMQ();
 
-await startRPCServer();
+    await startRPCServer();
 
-app.listen(PORT);
-
+    app.listen(process.env.PORT, () => {
+        console.log(`Server running on port ${process.env.PORT}`);
+    });
 }
 
-bootstrap();
+startServer().catch((error) => {
+    console.error(error);
+    process.exit(1);
+});
 ```
 
 ## Project Service
 
 ```javascript
-await connectRabbitMQ();
+require("dotenv").config();
 
-await startConsumers();
+const app = require("./app");
+const { connectRabbitMQ } = require("./rabbitmq/connection");
+const { startRPCServer } = require("./rabbitmq/rpcServer");
 
-app.listen(PORT);
+const PORT = process.env.PORT || 3002;
+
+async function startServer() {
+    await connectRabbitMQ();
+
+    await startRPCServer();
+
+    app.listen(process.env.PORT, () => {
+        console.log(`Server running on port ${process.env.PORT}`);
+    });
+}
+
+startServer().catch((error) => {
+    console.error(error);
+    process.exit(1);
+});
 ```
 
 ---
