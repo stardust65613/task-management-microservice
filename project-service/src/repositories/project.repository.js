@@ -104,6 +104,8 @@ async function GetAllProjectsJoined(userId){
             },
         },
     });
+
+    return projects;
 }
 
 module.exports = {

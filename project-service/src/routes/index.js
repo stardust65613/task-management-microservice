@@ -9,13 +9,15 @@ const router = express.Router();
 
 router.post("/create", authenticate, projectController.CreateProject);
 
+router.get("/list", authenticate, projectController.GetUserProject);
+
+router.get("/shared/:userId", authenticate, projectMemberController.GetCollabProject);
+
 router.put("/:id", authenticate, projectController.UpdateProject);
 
 router.get("/:id", authenticate, projectController.GetProjectDetail);
 
-router.get("/list", authenticate, projectController.GetUserProject);
-
-router.delete("/:id", authenticate, projectController.GetUserProject);
+router.delete("/:id", authenticate, projectController.DeleteProject);
 
 router.post("/:id/members", authenticate, projectMemberController.AddMember);
 
@@ -25,10 +27,8 @@ router.get("/:id/members", authenticate, projectMemberController.GetProjectMembe
 
 router.patch("/:id/members/:userId", authenticate, projectMemberController.UpdateMember);
 
-router.get("/shared/:userId", authenticate, projectMemberController.GetCollabProject);
+router.get("/:id/settings", authenticate, projectSettingController.GetProjectSetting);
 
-route.get("/:id/settings", authenticate, projectSettingController.GetProjectSetting);
-
-route.patch("/:id/settings", authenticate, projectSettingController.UpdateProjectSetting);
+router.patch("/:id/settings", authenticate, projectSettingController.UpdateProjectSetting);
 
 module.exports = router;

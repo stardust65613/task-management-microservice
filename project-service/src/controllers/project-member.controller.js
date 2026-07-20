@@ -30,7 +30,7 @@ const RemoveMember = async (req, res, next) => {
 
 const UpdateMember = async (req, res, next) => {
     try {
-        const result = await projectMemberService.UpdateMemberRole(req.user.id, req.params.id, req.params.userId);
+        const result = await projectMemberService.UpdateMemberRole(req.user.id, req.params.id, req.params.userId, req.body);
 
         return res.status(200).json({
             success: true,

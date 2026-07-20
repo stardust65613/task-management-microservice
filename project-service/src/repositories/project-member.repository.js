@@ -92,6 +92,8 @@ async function GetCollabProject(userId_1, userId_2){
             name: true,
         },
     });
+
+    return projects;
 }
 
 module.exports = {

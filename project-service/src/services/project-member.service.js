@@ -38,7 +38,7 @@ const AddMember = async (id, projectId, data) => {
     
     // Gọi auth service thông qua queue gửi đến rpc server của auth 
     const result = await request("auth.rpc", {
-        action = "CHECK_USER",
+        action: "CHECK_USER",
         data:{
             userId
         }
@@ -89,7 +89,7 @@ const RemoveMember = async (id, projectId, userId) => {
     return await projectMemberRepository.remove(projectMember.id);
 };
 
-const UpdateMemberRole = async (id, projectId, userId) => {
+const UpdateMemberRole = async (id, projectId, userId, data) => {
     const { role } = data;
 
     if (!userId){
@@ -154,6 +154,8 @@ const GetMembersOfProject = async (id, projectId) => {
             userIds,
         },
     });
+
+    console.log(response);
 
     const users = response.data;
 

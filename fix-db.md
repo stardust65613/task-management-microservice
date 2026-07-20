@@ -1,5 +1,14 @@
 # Cấu hình Prisma với PrismaPg (Prisma 7+)
 
+## 0. Cài đặt
+
+```bash
+npm install @prisma/client @prisma/adapter-pg
+npm install -D prisma
+```
+
+---
+
 ## 1. Schema (`prisma/schema.prisma`)
 
 > **Lưu ý:** Không khai báo `url` trực tiếp trong file `schema.prisma`.

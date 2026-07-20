@@ -16,11 +16,11 @@ const UpdateProjectSetting = async (req, res, next) => {
 
 const GetProjectSetting = async (req, res, next) => {
     try {
-        const result = await projectSettingService.UpdateProjectSetting(req.user.id, req.params.id);
+        const result = await projectSettingService.GetProjectSetting(req.user.id, req.params.id);
 
         return res.status(200).json({
             success: true,
-            message: "Project's setting updated successfully",
+            message: "Project's setting retrieved successfully",
             data: result,
         });
     } catch (err) {

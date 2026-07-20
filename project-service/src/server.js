@@ -6,10 +6,17 @@ const { startRPCServer } = require("./rabbitmq/rpcServer");
 
 const PORT = process.env.PORT || 3002;
 
-await connectRabbitMQ();
+async function startServer() {
+    await connectRabbitMQ();
 
-await startRPCServer();
+    await startRPCServer();
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    app.listen(process.env.PORT, () => {
+        console.log(`Server running on port ${process.env.PORT}`);
+    });
+}
+
+startServer().catch((error) => {
+    console.error(error);
+    process.exit(1);
 });

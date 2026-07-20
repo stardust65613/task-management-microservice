@@ -1,6 +1,8 @@
 const { getChannel } = require("./connection");
 
-const userService = require("../services/user.service");
+const projectService = require("../services/project.service");
+const projectMemberService = require("../services/project-setting.service");
+const projectSettingService = require("../services/project-member.service");
 
 const startRPCServer = async () => {
     const channel = getChannel();

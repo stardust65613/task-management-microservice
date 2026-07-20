@@ -47,6 +47,7 @@ async function findByIds(userIds) {
             },
         },
         select: {
+            id: true,
             username: true,
             avatar: true,
         },

@@ -1,6 +1,7 @@
 const projectSettingRepository = require("../repositories/project-setting.repository");
 const projectMemberRepository = require("../repositories/project-member.repository");
 const projectRepository = require("../repositories/project.repository");
+const { ProjectMemberRole, ProjectStatus } = require("@prisma/client");
 
 const UpdateProjectSetting = async (id, projectId, data) => {
     const { allowMemberInvite, allowFileUpload } = data;
