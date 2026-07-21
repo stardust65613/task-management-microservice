@@ -1,3 +1,4 @@
+const { getChannel } = require("./connection");
 const consume = async (
     exchange,
     queue,
@@ -40,3 +41,7 @@ const consume = async (
     });
 
 };
+
+module.exports = {
+    consume,
+}
