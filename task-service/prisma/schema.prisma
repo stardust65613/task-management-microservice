@@ -62,38 +62,45 @@ model Task {
 }
 
 
-
 model Comment {
 
   id String @id @default(uuid())
 
-
   taskId String
-
 
   userId String
 
-
   content String
-
 
   createdAt DateTime @default(now())
 
-
   updatedAt DateTime @updatedAt
-
-
 
   task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
+  mentions CommentMention[]
 
   @@index([taskId])
 
   @@index([userId])
-
 }
 
+model CommentMention {
 
+  id String @id @default(uuid())
+
+  commentId String
+
+  userId String // user được mention
+
+  createdAt DateTime @default(now())
+
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, userId])
+
+  @@index([userId])
+}
 
 model TaskAttachment {
 

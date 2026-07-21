@@ -1,3 +1,5 @@
+const { getChannel } = require("./connection");
+
 const publish = async (
     exchange,
     routingKey,
@@ -20,3 +22,7 @@ const publish = async (
         Buffer.from(JSON.stringify(message))
     );
 };
+
+module.exports = {
+    publish,
+}

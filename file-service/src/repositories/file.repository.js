@@ -47,6 +47,18 @@ async function remove(id) {
     });
 }
 
+async function findManyByIds(ids) {
+
+    return prisma.file.findMany({
+        where:{
+            id:{
+                in: ids
+            }
+        }
+    });
+
+}
+
 module.exports = {
     create,
     findById,
@@ -54,4 +66,5 @@ module.exports = {
     findAll,
     update,
     remove,
+    findManyByIds,
 };

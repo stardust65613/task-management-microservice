@@ -1,34 +1,51 @@
-const amqplib = require('amqplib');
+const { getChannel } = require("./connection");
+const { randomUUID } = require("crypto");
 
-(async () => {
-  const queue = 'tasks';
-  const conn = await amqplib.connect('amqp://localhost');
-  conn.on('error', (err) => { console.error('Connection error:', err); });
-  conn.on('handler-error', (err, event) => { console.error(`Uncaught exception in connection ${event} listener:`, err); });
+const request = async (queue, payload) => {
 
-  const ch1 = await conn.createChannel();
-  ch1.on('error', (err) => { console.error('Channel error:', err); });
-  ch1.on('handler-error', (err, event) => { console.error(`Uncaught exception in channel ${event} listener:`, err); });
-  await ch1.assertQueue(queue);
+    const channel = getChannel();
 
-  // Listener
-  ch1.consume(queue, (msg) => {
-    if (msg !== null) {
-      console.log('Received:', msg.content.toString());
-      ch1.ack(msg);
-    } else {
-      console.log('Consumer cancelled by server');
-    }
-  });
+    const replyQueue = await channel.assertQueue("", {
+        exclusive: true
+    });
 
-  ch1.publish
+    const correlationId = randomUUID();
 
-  // Sender
-  const ch2 = await conn.createChannel();
-  ch2.on('error', (err) => { console.error('Channel error:', err); });
-  ch2.on('handler-error', (err, event) => { console.error(`Uncaught exception in channel ${event} listener:`, err); });
+    return new Promise((resolve) => {
 
-  setInterval(() => {
-    ch2.sendToQueue(queue, Buffer.from('something to do'));
-  }, 1000);
-})();
+        channel.consume(
+            replyQueue.queue,
+            (msg) => {
+
+                if (
+                    msg.properties.correlationId === correlationId
+                ) {
+                    resolve(
+                        JSON.parse(
+                            msg.content.toString()
+                        )
+                    );
+                }
+
+            },
+            {
+                noAck: true
+            }
+        );
+
+        channel.sendToQueue(
+            queue,
+            Buffer.from(JSON.stringify(payload)),
+            {
+                correlationId,
+                replyTo: replyQueue.queue
+            }
+        );
+
+    });
+
+};
+
+module.exports = {
+    request
+};
