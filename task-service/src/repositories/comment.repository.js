@@ -11,6 +11,9 @@ async function findById(id) {
         where: {
             id,
         },
+        include: {
+            mentions: true,
+        },
     });
 }
 
@@ -18,6 +21,9 @@ async function findByTaskId(taskId) {
     return prisma.comment.findMany({
         where: {
             taskId,
+        },
+        include: {
+            mentions: true,
         },
         orderBy: {
             createdAt: "asc",
@@ -42,10 +48,45 @@ async function remove(id) {
     });
 }
 
+async function createMentions(commentId, userIds) {
+    return prisma.commentMention.createMany({
+        data: userIds.map(userId => ({
+            commentId,
+            userId,
+        })),
+        skipDuplicates: true,
+    });
+}
+
+async function deleteMentions(commentId) {
+    return prisma.commentMention.deleteMany({
+        where: {
+            commentId,
+        },
+    });
+}
+
+async function findMentionsByUser(userId) {
+    return prisma.commentMention.findMany({
+        where: {
+            userId,
+        },
+        include: {
+            comment: true,
+        },
+        orderBy: {
+            createdAt: "desc",
+        },
+    });
+}
+
 module.exports = {
     create,
     findById,
     findByTaskId,
     update,
     remove,
+    createMentions,
+    deleteMentions,
+    findMentionsByUser,
 };

@@ -179,10 +179,22 @@ const GetCollabProject = async (id, userId) => {
     return await projectMemberRepository.GetCollabProject(id, userId);
 };
 
+const CheckProjectMembers = async (projectId, userIds) => {
+    const members = await projectRepository.checkProjectMembers(
+        projectId,
+        userIds
+    );
+
+    return {
+        members,
+    };
+};
+
 module.exports = {
     AddMember,
     RemoveMember,
     UpdateMemberRole,
     GetMembersOfProject,
     GetCollabProject,
+    CheckProjectMembers,
 }

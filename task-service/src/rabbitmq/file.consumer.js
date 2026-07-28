@@ -26,15 +26,6 @@ const startConsumer = async () => {
             }
         }
     );
-
-    await consume(
-        "task.events",
-        "file-service.attachment.removed",
-        "task.attachment.removed",
-        async(data)=>{
-            await fileService.deleteFile(data.fileId);
-        }
-    );
 };
 
 

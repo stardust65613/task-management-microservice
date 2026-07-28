@@ -20,7 +20,12 @@ const startRPCServer = async () => {
         let response = null;
 
         switch (request.action) {
-
+            case "CHECK_PROJECT_MEMBERS":
+                response = await projectService.CheckProjectMembers(
+                    request.data.projectId,
+                    request.data.userIds
+                );
+                break;
             
 
             default:
