@@ -1,13 +1,11 @@
 const { getChannel } = require("./connection");
 
-const projectService = require("../services/project.service");
-const projectMemberService = require("../services/project-member.service");
-const projectSettingService = require("../services/project-setting.service");
+const taskService = require("../services/task.service");
 
 const startRPCServer = async () => {
     const channel = getChannel();
 
-    const queue = "project.rpc";
+    const queue = "task.rpc";
 
     await channel.assertQueue(queue, {
         durable: true,
@@ -20,13 +18,7 @@ const startRPCServer = async () => {
         let response = null;
 
         switch (request.action) {
-            case "CHECK_PROJECT_MEMBERS":
-                response = await projectMemberService.CheckProjectMembers(
-                    request.data.projectId,
-                    request.data.userIds
-                );
-                break;
-            
+
 
             default:
 

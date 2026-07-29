@@ -1,6 +1,6 @@
 const express = require("express");
 
-const taskProxy = require("../proxy/task.proxy");
+const taskProxy = require("../proxy/comment.proxy");
 const authMiddleware = require("../middleware/auth.middleware");
 const { globalRateLimit } = require("../middleware/rate-limit.middleware");
 

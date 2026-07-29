@@ -20,10 +20,19 @@ const startConsumer = async () => {
         async(data)=>{
             if(data.avatarId){
 
-                await fileService.deleteFile(
+                await fileService.DeleteFile(
                     data.avatarId
                 );
             }
+        }
+    );
+
+    await consume(
+        "task.events",
+        "file-service.attachment.removed",
+        "task.attachment.removed",
+        async(data)=>{
+            await fileService.deleteFile(data.fileId);
         }
     );
 };

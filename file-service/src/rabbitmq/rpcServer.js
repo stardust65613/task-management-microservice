@@ -5,7 +5,7 @@ const fileService = require("../services/file.service");
 const startRPCServer = async () => {
     const channel = getChannel();
 
-    const queue = "project.rpc";
+    const queue = "file.rpc";
 
     await channel.assertQueue(queue, {
         durable: true,
@@ -31,7 +31,7 @@ const startRPCServer = async () => {
 
                 break;
 
-            case "CHECK_FILE_EXISTS":
+            case "GET_FILE_BY_IDS":
 
                 response = await fileService.getFilesByIds(request.data.fileIds);
 

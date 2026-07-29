@@ -2,6 +2,7 @@ const projectRepository = require("../repositories/project.repository");
 const projectSettingRepository = require("../repositories/project-setting.repository");
 const projectMemberRepository = require("../repositories/project-member.repository");
 const { ProjectMemberRole, ProjectStatus } = require("@prisma/client");
+const { publish } = require("../rabbitmq/publisher");
 
 const CreateProject = async (id, data) => {
     const {name, description, visibility} = data;
@@ -95,8 +96,6 @@ const GetProject = async (id, projectId) => {
         throw new Error("You are not a member in this project.");
     }
 
-    /// Thêm code lấy các task của project rồi map vào project để hiển thị.
-
     return project;
 };
 
@@ -111,9 +110,23 @@ const DeleteProject = async (id, projectId) => {
         throw new Error("You are not the owner of this project");
     }
 
-    /// Thêm code xóa các task trong project
+    await publish(
+        "project.events",
+        "project.project.removed",
+        {
+            projectId,
+        }
+    );
 
     return await projectRepository.remove(projectId);
+};
+
+const DeleteProjectsByOwner = async (ownerId) => {
+    const projects = await projectRepository.findByOwner(ownerId);
+
+    for (const project of projects) {
+        await DeleteProject(project.id);
+    }
 };
 
 module.exports = {
@@ -122,4 +135,5 @@ module.exports = {
     GetProjectsByUser,
     GetProject,
     DeleteProject,
+    DeleteProjectsByOwner,
 }

@@ -96,6 +96,20 @@ async function GetCollabProject(userId_1, userId_2){
     return projects;
 }
 
+async function CheckProjectMembers(projectId, userIds) {
+    return prisma.projectMember.findMany({
+        where: {
+            projectId,
+            userId: {
+                in: userIds,
+            },
+        },
+        select: {
+            userId: true,
+        },
+    });
+}
+
 module.exports = {
     create,
     find,
@@ -104,5 +118,6 @@ module.exports = {
     updateRole,
     remove,
     RemoveMember,
-    GetCollabProject
+    GetCollabProject,
+    CheckProjectMembers,
 };
