@@ -1,5 +1,6 @@
 const userRepository = require("../repositories/user.repository");
-
+const { publish } = require("../rabbitmq/publisher");
+const { request } = require("../rabbitmq/rpcClient");
 
 const GetUserInformation = async (id) => {
     const info = await userRepository.findById(id);
@@ -19,14 +20,14 @@ const GetMyInformation = async (id) => {
 }
 
 const EditInfomation = async (id, data) => {
-    const { username, firstname, lastname } = data;
+    const { username, firstName, lastName } = data;
 
     if (!username){
         throw new Error("Username must not be null.")
     }
 
     try {
-        return await userRepository.updateUser(id, { username, firstname, lastname ,});
+        return await userRepository.updateUser(id, { username, firstName, lastName ,});
     } catch (error) {
         if (error.code === "P2025") {
             throw new Error("User not found");
@@ -50,12 +51,51 @@ async function getUsersByIds(userIds) {
         success: true,
         data: users,
     };
-}
+};
+
+const UpdateAvatar = async (userId, fileId) => {
+    // 1. kiểm tra file tồn tại
+    const result = await request("file.rpc", {
+        action: "CHECK_FILE_EXISTS",
+        data: { fileId },
+    });
+
+    if (!result) {
+        throw new Error("File not found");
+    }
+
+    // 2. lấy user
+    const user = await userRepository.findById(userId);
+
+    const oldAvatar = user.avatarFileId;
+
+    // 3. cập nhật avatar
+    await userRepository.updateAvatar(userId, fileId);
+
+    // 4. publish event
+    await publish(
+        "user.events",
+        "user.deleted", 
+        {
+            avatarId: oldAvatar,
+        }
+    );
+};
+
+const DeleteUser = async (userId) => {
+    if(!userId){
+        throw new Error("userId must not be null");
+    }
+
+    return await userRepository.deleteUser(userId);
+};
 
 module.exports = {
     GetMyInformation,
     GetUserInformation,
     EditInfomation,
     CheckUserExists,
-    getUsersByIds
+    getUsersByIds,
+    UpdateAvatar,
+    DeleteUser,
 }

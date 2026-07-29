@@ -59,10 +59,6 @@ const GetTasksByProject = async (id, projectId) => {
 };
 
 const GetTaskDetail = async (taskId) => {
-    if(!id){
-        throw new Error("UserId must not be null");
-    }
-
     if(!taskId){
         throw new Error("taskId must not be null");
     }
@@ -183,7 +179,7 @@ const GetMyTasks = async (assigneeId, filters) => {
 
 const GetOverdueTasks = async (projectId) => {
     if(!projectId){
-        throw new Error("assigneeId must not be null");
+        throw new Error("projectId must not be null");
     }
 
     return await taskRepository.getOverdueTasks(projectId);
@@ -197,6 +193,10 @@ const GetTasksStatistics = async (projectId) => {
     return await taskRepository.getTaskStatistics(projectId);
 };
 
+const DeleteTasksByProject = async (projectId) => {
+    return await taskRepository.deleteByProjectId(projectId);
+};
+
 module.exports = {
     CreateTask,
     GetTasksByProject,
@@ -205,4 +205,9 @@ module.exports = {
     DeleteTask,
     AssignTask,
     SearchTasks,
+    DeleteTasksByProject,
+    GetTasksByAssignee,
+    GetMyTasks,
+    GetOverdueTasks,
+    GetTasksStatistics,
 }

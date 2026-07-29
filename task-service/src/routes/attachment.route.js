@@ -1,5 +1,5 @@
 const express = require("express");
-const attachmentController = require("../controllers/attachment.controller");
+const attachmentController = require("../controllers/task-attachment.controller");
 
 const router = express.Router();
 

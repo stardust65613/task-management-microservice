@@ -6,7 +6,25 @@ module.exports = (target, prefix = "") =>
         changeOrigin: true,
         xfwd: true,
 
-        pathRewrite: (path) => {
-            return prefix + path;
+        pathRewrite: (path, req) => {
+            const newPath = prefix + path;
+
+            console.log({
+                target,
+                originalUrl: req.originalUrl,
+                url: req.url,
+                path,
+                newPath
+            });
+
+            return newPath;
         },
+
+        onProxyReq(proxyReq, req) {
+            console.log(
+                "FORWARD:",
+                req.method,
+                target + req.url
+            );
+        }
     });

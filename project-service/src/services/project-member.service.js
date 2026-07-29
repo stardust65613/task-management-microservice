@@ -180,7 +180,7 @@ const GetCollabProject = async (id, userId) => {
 };
 
 const CheckProjectMembers = async (projectId, userIds) => {
-    const members = await projectRepository.checkProjectMembers(
+    const members = await projectMemberRepository.CheckProjectMembers(
         projectId,
         userIds
     );

@@ -20,7 +20,7 @@ const startConsumer = async () => {
         async(data)=>{
             if(data.avatarId){
 
-                await fileService.deleteFile(
+                await fileService.DeleteFile(
                     data.avatarId
                 );
             }

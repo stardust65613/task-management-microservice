@@ -42,8 +42,38 @@ const EditInformation = async (req, res, next) => {
     }
 };
 
+const UpdateAvatar = async (req, res, next) => {
+    try {
+        const result = await userService.UpdateAvatar(req.user.id, req.body.fileId);
+
+        return res.status(200).json({
+            success: true,
+            message: "Avatar updated successfully",
+            data: result,
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+const DeleteUser = async (req, res, next) => {
+    try {
+        const result = await userService.DeleteUser(req.user.id);
+
+        return res.status(204).json({
+            success: true,
+            message: "User deleted succcessfully",
+            data: result,
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
 module.exports = {
     GetMyInfo,
     GetUserInfo,
-    EditInformation
+    EditInformation,
+    UpdateAvatar,
+    DeleteUser,
 }

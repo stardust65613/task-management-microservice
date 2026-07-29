@@ -16,7 +16,7 @@ const AttachFileToTask = async (req, res, next) => {
 
 const RemoveFileFromTask = async (req, res, next) => {
     try {
-        const result = await attachmentService.RemoveFileFromTask(req.params.attachmentId);
+        const result = await attachmentService.RemoveFileFromTask(req.params.taskId, req.params.fileId);
 
         return res.status(204).json({
             success: true,

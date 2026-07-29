@@ -54,11 +54,23 @@ async function findByIds(userIds) {
     });
 }
 
+async function updateAvatar(userId, fileId) {
+    return prisma.user.update({
+        where: {
+            id: userId,
+        },
+        data: {
+            avatar: fileId,
+        },
+    });
+}
+
 module.exports = {
     findByEmail,
     createUser,
     findById,
     updateUser,
     deleteUser,
-    findByIds
+    findByIds,
+    updateAvatar,
 };

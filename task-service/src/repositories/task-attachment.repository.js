@@ -33,11 +33,23 @@ async function find(taskId, fileId) {
     });
 }
 
-async function remove(id) {
+async function remove(taskId, fileId) {
     return prisma.taskAttachment.delete({
         where: {
-            id,
-        },
+            taskId_fileId: {
+                taskId,
+                fileId
+            }
+        }
+    });
+}
+
+async function findByTaskIdAndFileId(taskId, fileId) {
+    return prisma.taskAttachment.findFirst({
+        where: {
+            taskId,
+            fileId
+        }
     });
 }
 
@@ -47,4 +59,5 @@ module.exports = {
     findByTaskId,
     find,
     remove,
+    findByTaskIdAndFileId,
 };

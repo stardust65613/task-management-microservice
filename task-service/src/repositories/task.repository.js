@@ -240,6 +240,14 @@ async function getTaskStatistics(projectId) {
     return statistics;
 }
 
+async function deleteByProjectId(projectId) {
+    return prisma.task.deleteMany({
+        where: {
+            projectId,
+        },
+    });
+}
+
 module.exports = {
     create,
     findById,
@@ -253,4 +261,5 @@ module.exports = {
     getMyTasks,
     getOverdueTasks,
     getTaskStatistics,
+    deleteByProjectId,
 };

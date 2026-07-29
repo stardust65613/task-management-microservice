@@ -33,10 +33,10 @@ const AttachFileToTask = async (taskId, fileId) => {
         throw new Error("file does not exist");
     }
 
-    return await attachmentRepository.create({taskId, fileId: file.id, uploadBy: file.uploadBy, taskId, });
+    return await attachmentRepository.create({taskId, fileId: file.id, uploadedBy: file.uploadedBy, taskId, });
 };
 
-const RemoveFileFromTask = async (attachmentId) => {
+const RemoveFileFromTask = async (taskId, fileId) => {
     if(!taskId){
         throw new Error("taskId must not be null");
     }
@@ -45,13 +45,11 @@ const RemoveFileFromTask = async (attachmentId) => {
         throw new Error("fileId must not be null");
     }
 
-    const attachment = attachmentRepository.findById(attachmentId);
+    const attachment = attachmentRepository.findByTaskIdAndFileId(taskId, fileId);
 
     if(!attachment){
         throw new Error("attachment not found");
     }
-
-    const fileId = attachment.fileId;
 
     await publish(
         "task.events",
@@ -61,7 +59,7 @@ const RemoveFileFromTask = async (attachmentId) => {
         }
     );
 
-    return await attachmentRepository.remove(attachmentId);
+    return await attachmentRepository.remove(taskId, fileId);
 };
 
 

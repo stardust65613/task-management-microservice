@@ -2,6 +2,7 @@ const taskService = require("../services/task.service");
 
 const CreateTask = async (req, res, next) => {
     try {
+        console.log("params:", req.params);
         const result = await taskService.CreateTask(req.user.id, req.params.projectId, req.body);
 
         return res.status(201).json({
@@ -58,7 +59,7 @@ const UpdateTask = async (req, res, next) => {
 
 const DeleteTask = async (req, res, next) => {
     try {
-        const result = await taskService.DeleteTask(req,params.taskId);
+        const result = await taskService.DeleteTask(req.params.taskId);
 
         return res.status(204).json({
             success: true,
@@ -72,7 +73,7 @@ const DeleteTask = async (req, res, next) => {
 
 const AssignTask = async (req, res, next) => {
     try {
-        const result = await taskService.AssignTask(req.params.taskId, req.body.assingeeId);
+        const result = await taskService.AssignTask(req.params.taskId, req.body.assigneeId);
 
         return res.status(200).json({
             success: true,
@@ -100,7 +101,7 @@ const SearchTask = async (req, res, next) => {
 
 const GetTaskByAssignee = async (req, res, next) => {
     try {
-        const result = await taskService.GetTaskByAssignee(req.params.projectId, req.body.assigneeId);
+        const result = await taskService.GetTasksByAssignee(req.params.projectId, req.params.userId);
 
         return res.status(200).json({
             success: true,

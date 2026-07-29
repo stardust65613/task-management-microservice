@@ -2,14 +2,10 @@ const taskCommentRepository = require("../repositories/comment.repository");
 const { request } = require("../rabbitmq/rpcClient");
 
 const AddComment = async (id, taskId, data) => {
-    const { content, mentions } = data;
-
-    if(!userId){
-        throw new Error("userId must not br null");
-    }
+    const { content, mentions, projectId } = data;
 
     if(!taskId){
-        throw new Error("taskId must not br null");
+        throw new Error("taskId must not be null");
     }
 
     const comment = await taskCommentRepository.create({ userId: id, taskId, content, });
@@ -31,7 +27,7 @@ const AddComment = async (id, taskId, data) => {
     }
 
     if (mentions.length > 0) {
-        await commentRepository.createMentions(
+        await taskCommentRepository.createMentions(
             comment.id,
             mentions
         );
@@ -75,7 +71,7 @@ const GetAllComment = async (taskId) => {
 };
 
 const GetMentionsByUser = async (userId) => {
-    return await commentRepository.findMentionsByUser(userId);
+    return await taskCommentRepository.findMentionsByUser(userId);
 };
 
 module.exports = {

@@ -10,35 +10,75 @@ const connectRabbitMQ = async () => {
         return { connection, channel };
     }
 
-    try {
-        connection = await amqp.connect(process.env.RABBITMQ_URL);
+    while (true) {
+        try {
 
-        connection.on("error", (err) => {
-            console.error("RabbitMQ Connection Error:", err);
-        });
+            connection = await amqp.connect(
+                process.env.RABBITMQ_URL
+            );
 
-        connection.on("close", () => {
-            console.log("RabbitMQ Connection Closed");
+            connection.on("error", (err) => {
+                console.error(
+                    "RabbitMQ Connection Error:",
+                    err
+                );
+            });
+
+            connection.on("close", () => {
+                console.log(
+                    "RabbitMQ Connection Closed"
+                );
+
+                connection = null;
+                channel = null;
+            });
+
+
+            channel = await connection.createChannel();
+
+
+            channel.on("error", (err) => {
+                console.error(
+                    "RabbitMQ Channel Error:",
+                    err
+                );
+            });
+
+
+            channel.on("close", () => {
+                console.log(
+                    "RabbitMQ Channel Closed"
+                );
+            });
+
+
+            console.log("RabbitMQ Connected");
+
+
+            // giữ nguyên return
+            return {
+                connection,
+                channel
+            };
+
+
+        } catch (error) {
+
+            console.error(
+                "Failed to connect RabbitMQ:",
+                error.message
+            );
+
+
             connection = null;
             channel = null;
-        });
 
-        channel = await connection.createChannel();
 
-        channel.on("error", (err) => {
-            console.error("RabbitMQ Channel Error:", err);
-        });
-
-        channel.on("close", () => {
-            console.log("RabbitMQ Channel Closed");
-        });
-
-        console.log("RabbitMQ Connected");
-
-        return { connection, channel };
-    } catch (error) {
-        console.error("Failed to connect RabbitMQ:", error);
-        throw error;
+            // đợi 5 giây rồi thử lại
+            await new Promise(resolve =>
+                setTimeout(resolve, 5000)
+            );
+        }
     }
 };
 

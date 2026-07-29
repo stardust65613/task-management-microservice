@@ -12,4 +12,8 @@ router.get("/:id", authenticate, userController.GetUserInfo);
 
 router.put("/me", authenticate, userController.EditInformation);
 
+router.put("/myavatar", authenticate, userController.UpdateAvatar);
+
+router.delete("/myaccount", authenticate, userController.DeleteUser);
+
 module.exports = router;

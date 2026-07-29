@@ -2,7 +2,7 @@ const commentService = require("../services/comment.service");
 
 const AddComment = async (req, res, next) => {
     try {
-        const result = await commentService.AddComment(req.user.id, req.params.id, req.body);
+        const result = await commentService.AddComment(req.user.id, req.params.taskId, req.body);
 
         return res.status(201).json({
             success: true,
