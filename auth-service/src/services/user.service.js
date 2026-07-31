@@ -44,12 +44,11 @@ const CheckUserExists = async (id) => {
     };
 };
 
-async function getUsersByIds(userIds) {
+const getUsersByIds = async (userIds) => {
     const users = await userRepository.findByIds(userIds);
 
     return {
-        success: true,
-        data: users,
+        users,
     };
 };
 

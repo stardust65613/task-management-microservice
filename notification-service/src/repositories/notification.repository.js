@@ -85,6 +85,27 @@ async function removeByUserId(userId) {
     });
 }
 
+async function countUnread(userId){
+    return prisma.notification.count({
+        where: {
+            userId,
+            isRead: false,
+        },
+    });
+}
+
+async function getUnread(userId){
+    return prisma.notification.findMany({
+        where: {
+            userId,
+            isRead: false,
+        },
+        orderBy: {
+            createdAt: "desc",
+        },
+    });
+}
+
 module.exports = {
     create,
     findById,
@@ -95,4 +116,6 @@ module.exports = {
     update,
     remove,
     removeByUserId,
+    countUnread,
+    getUnread,
 };

@@ -81,6 +81,22 @@ services:
       - ./file-service:/app
       - /app/node_modules
 
+  notification-service:
+    build: ./notification-service
+    depends_on:
+    - postgres
+    - rabbitmq
+    - minio
+    - redis
+    container_name: notification-service
+    ports:
+      - "3004:3004"
+    env_file:
+      - ./notification-service/.env
+    volumes:
+      - ./notification-service:/app
+      - /app/node_modules
+
   postgres:
 
     image: postgres:17

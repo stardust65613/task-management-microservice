@@ -14,5 +14,6 @@ router.get("/tasks/:taskId", taskController.GetTaskDetail);
 router.patch("/tasks/:taskId", taskController.UpdateTask);
 router.patch("/tasks/:taskId/assignee", taskController.AssignTask);
 router.delete("/tasks/:taskId", taskController.DeleteTask);
+router.patch("/tasks/:taskId/complete", taskController.CompleteTask);
 
 module.exports = router;

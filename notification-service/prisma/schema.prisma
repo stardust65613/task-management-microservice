@@ -1,6 +1,5 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -35,10 +34,11 @@ model Notification {
   @@index([userId])
 }
 
-
 enum NotificationType {
   TASK_ASSIGNED
   TASK_COMPLETED
   COMMENT_CREATED
+  COMMENT_MENTIONED
+  PROJECT_INVITED
   SYSTEM
 }

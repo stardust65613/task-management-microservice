@@ -49,6 +49,7 @@ async function findByIds(userIds) {
         select: {
             id: true,
             username: true,
+            email: true,
             avatar: true,
         },
     });

@@ -7,10 +7,12 @@ const taskRoutes = require("./task.route");
 const fileRoutes = require("./file.route");
 const taskProjectRoutes = require("./task-project.route");
 const commentRoutes = require("./comment.route");
+const notificationRoutes = require("./notification.route");
 
 const router = express.Router();
 
 router.use("/projects/:projectId/tasks", taskProjectRoutes);
+router.use("/notifications", notificationRoutes);
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
 router.use("/projects", projectRoutes);

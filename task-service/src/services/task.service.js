@@ -1,6 +1,8 @@
 const { task } = require("../lib/prisma");
 const taskRepository = require("../repositories/task.repository");
 const { TaskPriority, TaskStatus } = require("@prisma/client");
+const { request } = require("../rabbitmq/rpcClient");
+const { publish } = require("../rabbitmq/publisher");
 
 const CreateTask = async (id, projectId, data) => {
     const { title, description, status, priority, dueDate } = data;
@@ -74,7 +76,7 @@ const UpdateTask = async (taskId, data) => {
     const { title, description, status, priority, dueDate } = data;
 
     if(!title){
-        throw new Error("Title must not br null");
+        throw new Error("Title must not be null");
     }
 
     if(
@@ -138,7 +140,42 @@ const AssignTask = async (taskId, assigneeId) => {
         throw new Error("assigneeId must not be null");
     }
 
-    return await taskRepository.update(taskId, { assigneeId });
+    const task = await taskRepository.update(taskId, {
+        assigneeId,
+    });
+
+    const result = await request("auth.rpc", {
+        action: "GET_USERS_BY_IDS",
+        data: {
+            userIds: [assigneeId],
+        },
+    });
+
+    const assignee = result.users[0];
+
+    const project = await request("project.rpc", {
+        action: "GET_PROJECT_INFO",
+        data: {
+            projectId: task.projectId,
+            userId: assigneeId,
+        },
+    });
+
+    await publish(
+        "notification.events",
+        "task.assigned",
+        {
+            userId: assignee.id,
+            username: assignee.username,
+            email: assignee.email,
+            taskId: task.id,
+            taskTitle: task.title,
+            projectId: project.id,
+            projectName: project.name,
+        }
+    );
+
+    return task;
 };
 
 const SearchTasks = async (projectId, filters) => {
@@ -197,6 +234,78 @@ const DeleteTasksByProject = async (projectId) => {
     return await taskRepository.deleteByProjectId(projectId);
 };
 
+const CompleteTask = async (id, taskId) => {
+    const task = await taskRepository.findById(taskId);
+
+    if (!task) {
+        throw new Error("Task not found");
+    }
+
+    if (task.status === "DONE") {
+        throw new Error("Task is already completed");
+    }
+
+    if (task.status === "CANCELLED") {
+        throw new Error("Cancelled task cannot be completed");
+    }
+
+    // Chỉ assignee hoặc người tạo task mới được complete
+    if (id !== task.assigneeId && id !== task.createdBy) {
+        throw new Error("You don't have permission to complete this task");
+    }
+
+    const updatedTask = await taskRepository.update(taskId, {
+        status: "DONE",
+    });
+
+    const result = await request("auth.rpc", {
+        action: "GET_USERS_BY_IDS",
+        data: {
+            userIds: [task.assigneeId, task.createdBy],
+        },
+    });
+
+    const users = result.users;
+
+    const assignee = users.find(user => user.id === task.assigneeId);
+    const creator = users.find(user => user.id === task.createdBy);
+
+    if (!assignee || !creator) {
+        throw new Error("User not found");
+    }
+
+    const project = await request("project.rpc", {
+        action: "GET_PROJECT_INFO",
+        data: {
+            projectId: task.projectId,
+            userId: id,
+        },
+    });
+
+    // Chỉ gửi mail khi assignee hoàn thành task do người khác tạo
+    if (id === task.assigneeId && task.assigneeId !== task.createdBy) {
+        await publish(
+            "notification.events",
+            "task.completed",
+            {
+                userId: creator.id,
+                username: creator.username,
+                email: creator.email,
+
+                completedBy: assignee.username,
+
+                taskId: updatedTask.id,
+                taskTitle: updatedTask.title,
+
+                projectId: project.id,
+                projectName: project.name,
+            }
+        );
+    }
+
+    return updatedTask;
+};
+
 module.exports = {
     CreateTask,
     GetTasksByProject,
@@ -210,4 +319,5 @@ module.exports = {
     GetMyTasks,
     GetOverdueTasks,
     GetTasksStatistics,
+    CompleteTask,
 }
