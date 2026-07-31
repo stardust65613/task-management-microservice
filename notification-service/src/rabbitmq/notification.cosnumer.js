@@ -6,42 +6,42 @@ const emailHandler = require("./handlers/email.handler");
 const startConsumer = async () => {
     await consume(
         "notification.events",
-        "notification.queue",
+        "notification.task.assigned.queue",
         "task.assigned",
         notificationHandler.handleTaskAssigned
     );
 
     await consume(
         "notification.events",
-        "notification.queue",
+        "notification.task.completed.queue",
         "task.completed",
         notificationHandler.handleTaskCompleted
     );
 
     await consume(
         "notification.events",
-        "notification.queue",
+        "notification.project.invited.queue",
         "project.invited",
         notificationHandler.handleProjectInvited
     );
 
     await consume(
         "notification.events",
-        "email.queue",
+        "email.task.assigned.queue",
         "task.assigned",
         emailHandler.handleTaskAssignedEmail
     );
 
     await consume(
         "notification.events",
-        "email.queue",
+        "email.task.completed.queue",
         "task.completed",
         emailHandler.handleTaskCompletedEmail
     );
 
     await consume(
         "notification.events",
-        "email.queue",
+        "email.project.invited.queue",
         "project.invited",
         emailHandler.handleProjectInvitedEmail
     );

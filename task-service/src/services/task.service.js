@@ -258,17 +258,23 @@ const CompleteTask = async (id, taskId) => {
         status: "DONE",
     });
 
-    const { users } = await request("auth.rpc", {
+    const result = await request("auth.rpc", {
         action: "GET_USERS_BY_IDS",
         data: {
             userIds: [task.assigneeId, task.createdBy],
         },
     });
 
+    const users = result.users;
+
     const assignee = users.find(user => user.id === task.assigneeId);
     const creator = users.find(user => user.id === task.createdBy);
 
-    const { project } = await request("project.rpc", {
+    if (!assignee || !creator) {
+        throw new Error("User not found");
+    }
+
+    const project = await request("project.rpc", {
         action: "GET_PROJECT_INFO",
         data: {
             projectId: task.projectId,
@@ -276,7 +282,7 @@ const CompleteTask = async (id, taskId) => {
         },
     });
 
-    // Chỉ gửi mail nếu người hoàn thành KHÔNG phải người tạo task
+    // Chỉ gửi mail khi assignee hoàn thành task do người khác tạo
     if (id === task.assigneeId && task.assigneeId !== task.createdBy) {
         await publish(
             "notification.events",
