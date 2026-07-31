@@ -2,6 +2,7 @@ const { task } = require("../lib/prisma");
 const taskRepository = require("../repositories/task.repository");
 const { TaskPriority, TaskStatus } = require("@prisma/client");
 const { request } = require("../rabbitmq/rpcClient");
+const { publish } = require("../rabbitmq/publisher");
 
 const CreateTask = async (id, projectId, data) => {
     const { title, description, status, priority, dueDate } = data;
@@ -155,7 +156,8 @@ const AssignTask = async (taskId, assigneeId) => {
     const project = await request("project.rpc", {
         action: "GET_PROJECT_INFO",
         data: {
-            projectId,
+            projectId: task.projectId,
+            userId: assigneeId,
         },
     });
 
@@ -232,7 +234,7 @@ const DeleteTasksByProject = async (projectId) => {
     return await taskRepository.deleteByProjectId(projectId);
 };
 
-const CompleteTask = async (taskId) => {
+const CompleteTask = async (id, taskId) => {
     const task = await taskRepository.findById(taskId);
 
     if (!task) {
@@ -247,52 +249,53 @@ const CompleteTask = async (taskId) => {
         throw new Error("Cancelled task cannot be completed");
     }
 
+    // Chỉ assignee hoặc người tạo task mới được complete
+    if (id !== task.assigneeId && id !== task.createdBy) {
+        throw new Error("You don't have permission to complete this task");
+    }
+
     const updatedTask = await taskRepository.update(taskId, {
         status: "DONE",
     });
 
-
     const { users } = await request("auth.rpc", {
         action: "GET_USERS_BY_IDS",
         data: {
-            userIds: [
-                task.assigneeId,
-                task.createdBy,
-            ],
+            userIds: [task.assigneeId, task.createdBy],
         },
     });
 
+    const assignee = users.find(user => user.id === task.assigneeId);
+    const creator = users.find(user => user.id === task.createdBy);
 
     const { project } = await request("project.rpc", {
         action: "GET_PROJECT_INFO",
         data: {
             projectId: task.projectId,
+            userId: id,
         },
     });
 
+    // Chỉ gửi mail nếu người hoàn thành KHÔNG phải người tạo task
+    if (id === task.assigneeId && task.assigneeId !== task.createdBy) {
+        await publish(
+            "notification.events",
+            "task.completed",
+            {
+                userId: creator.id,
+                username: creator.username,
+                email: creator.email,
 
-    const assignee = users.find(
-        user => user.id === task.assigneeId
-    );
+                completedBy: assignee.username,
 
+                taskId: updatedTask.id,
+                taskTitle: updatedTask.title,
 
-    await publish(
-        "notification.events",
-        "task.completed",
-        {
-            userId: task.createdBy,
-
-            username: assignee?.username,
-            email: assignee?.email,
-
-            taskId: updatedTask.id,
-            taskTitle: updatedTask.title,
-
-            projectId: project.id,
-            projectName: project.name,
-        }
-    );
-
+                projectId: project.id,
+                projectName: project.name,
+            }
+        );
+    }
 
     return updatedTask;
 };

@@ -28,7 +28,7 @@ const startRPCServer = async () => {
                 break;
 
             case "GET_PROJECT_INFO":
-                response = await projectService.GetProject(1,request.data.projectId);
+                response = await projectService.GetProject(request.data.userId,request.data.projectId);
                 break;
             
 

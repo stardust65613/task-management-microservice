@@ -1,11 +1,11 @@
 const { getChannel } = require("./connection");
 
-const fileService = require("../services/file.service");
+const notificationService = require("../services/notification.service")
 
 const startRPCServer = async () => {
     const channel = getChannel();
 
-    const queue = "file.rpc";
+    const queue = "notification.rpc";
 
     await channel.assertQueue(queue, {
         durable: true,

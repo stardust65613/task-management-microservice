@@ -3,7 +3,7 @@ require("dotenv").config();
 const app = require("./app");
 const { connectRabbitMQ } = require("./rabbitmq/connection");
 const { startRPCServer } = require("./rabbitmq/rpcServer");
-const startConsumer = require("./rabbitmq/file.consumer");
+const startConsumer = require("./rabbitmq/notification.cosnumer");
 
 const PORT = process.env.PORT || 3004;
 

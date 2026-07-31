@@ -3,6 +3,7 @@ const projectMemberRepository = require("../repositories/project-member.reposito
 const projectSettingRepository = require("../repositories/project-setting.repository");
 const { request } = require("../rabbitmq/rpcClient");
 const { ProjectMemberRole, ProjectStatus } = require("@prisma/client");
+const { publish } = require("../rabbitmq/publisher");
 
 const AddMember = async (id, projectId, data) => {
     const { userId } = data;

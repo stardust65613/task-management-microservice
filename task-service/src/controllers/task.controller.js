@@ -157,7 +157,7 @@ const GetTasksStatistics = async (req, res, next) => {
 
 const CompleteTask = async (req, res, next) => {
     try {
-        const result = await taskService.CompleteTask(req.params.taskId);
+        const result = await taskService.CompleteTask(req.user.id, req.params.taskId);
 
         return res.status(200).json({
             success: true,
