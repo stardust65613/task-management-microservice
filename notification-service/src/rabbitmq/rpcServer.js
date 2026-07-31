@@ -1,13 +1,11 @@
 const { getChannel } = require("./connection");
 
-const projectService = require("../services/project.service");
-const projectMemberService = require("../services/project-member.service");
-const projectSettingService = require("../services/project-setting.service");
+const fileService = require("../services/file.service");
 
 const startRPCServer = async () => {
     const channel = getChannel();
 
-    const queue = "project.rpc";
+    const queue = "file.rpc";
 
     await channel.assertQueue(queue, {
         durable: true,
@@ -20,17 +18,24 @@ const startRPCServer = async () => {
         let response = null;
 
         switch (request.action) {
-            case "CHECK_PROJECT_MEMBERS":
-                response = await projectMemberService.CheckProjectMembers(
-                    request.data.projectId,
-                    request.data.userIds
-                );
+
+            case "CHECK_FILE_EXISTS":
+
+                response = await fileService.CheckFileExists(request.data.fileId);
+
                 break;
 
-            case "GET_PROJECT_INFO":
-                response = await projectService.GetProject(1,request.data.projectId);
+            case "GET_FILE_INFO":
+
+                response = await fileService.GetFile(request.data.fileId);
+
                 break;
-            
+
+            case "GET_FILE_BY_IDS":
+
+                response = await fileService.getFilesByIds(request.data.fileIds);
+
+                break;
 
             default:
 

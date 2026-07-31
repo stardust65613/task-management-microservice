@@ -48,7 +48,43 @@ const AddMember = async (id, projectId, data) => {
         throw new Error("User does not exist");
     }
 
-    return await projectMemberRepository.create({ userId, projectId, });
+    const projectMember = await projectMemberRepository.create({ userId, projectId, });
+
+    const { users } = await request("auth.rpc", {
+        action: "GET_USERS_BY_IDS",
+        data: {
+            userIds: [
+                userId,
+                id,
+            ],
+        },
+    });
+
+
+    const invitedUser = users.find(
+        user => user.id === userId
+    );
+
+    const inviter = users.find(
+        user => user.id === id
+    );
+
+    await publish(
+        "notification.events",
+        "project.invited",
+        {
+            userId: invitedUser.id,
+            username: invitedUser.username,
+            email: invitedUser.email,
+
+            projectId: project.id,
+            projectName: project.name,
+
+            inviterName: inviter.username,
+        }
+    );
+
+    return projectMember;
 };
 
 const RemoveMember = async (id, projectId, userId) => {
