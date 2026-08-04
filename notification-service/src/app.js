@@ -8,7 +8,7 @@ const app = express();
 app.use(express.json());
 
 // Routes
-app.use("/notificatons", notificationRouter);
+app.use("/notifications", notificationRouter);
 
 // Không tìm thấy route
 app.use(notFound);

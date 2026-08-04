@@ -106,6 +106,15 @@ async function getUnread(userId){
     });
 }
 
+async function updateMany(userId, data) {
+    return prisma.notification.updateMany({
+        where: {
+            userId,
+        },
+        data,
+    });
+}
+
 module.exports = {
     create,
     findById,
@@ -118,4 +127,5 @@ module.exports = {
     removeByUserId,
     countUnread,
     getUnread,
+    updateMany,
 };
