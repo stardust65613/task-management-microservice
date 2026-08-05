@@ -66,6 +66,19 @@ async function updateAvatar(userId, fileId) {
     });
 }
 
+async function findByUsername(username) {
+
+  return prisma.user.findUnique({
+    where: {
+      username
+    },
+    include: {
+      roles: true
+    }
+  });
+
+}
+
 module.exports = {
     findByEmail,
     createUser,
@@ -74,4 +87,5 @@ module.exports = {
     deleteUser,
     findByIds,
     updateAvatar,
+    findByUsername,
 };

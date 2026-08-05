@@ -15,6 +15,12 @@ const register = async (data) => {
         throw new Error("Email already exists");
     }
 
+    const existingUsername = await userRepository.findByUsername(username);
+
+    if (existingUsername) {
+        throw new Error("Username already exists");
+    }
+
     const hashedPassword = await bcrypt.hash(password, 9);
 
     const user = await userRepository.createUser({
@@ -34,6 +40,10 @@ const login = async (data) => {
     }
 
     const user = await userRepository.findByEmail(email);
+
+    if (!user) {
+        throw new Error("Invalid email or password");
+    }
 
     const isMatch = await bcrypt.compare(
         password,
