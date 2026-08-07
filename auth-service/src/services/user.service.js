@@ -5,11 +5,14 @@ const { request } = require("../rabbitmq/rpcClient");
 const GetUserInformation = async (id) => {
     const info = await userRepository.findById(id);
 
-    const { username, avatar } = info;
+    const { username, avatar, createdAt, email, isActive } = info;
 
     public_info = {
         username,
-        avatar
+        avatar,
+        createdAt,
+        email,
+        isActive,
     }
 
     return public_info;

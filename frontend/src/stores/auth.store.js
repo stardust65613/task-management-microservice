@@ -1,10 +1,12 @@
 import { defineStore } from "pinia";
+import { useUserStore } from "./user.store";
 import * as authService from "@/services/auth.service";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
-    user: null,
-    token: null,
+    accessToken: localStorage.getItem("accessToken"),
+    refreshToken: localStorage.getItem("refreshToken"),
+    user: JSON.parse(localStorage.getItem("user") || "null"),
   }),
 
   actions: {
@@ -12,18 +14,27 @@ export const useAuthStore = defineStore("auth", {
     async login(data) {
       const res = await authService.login(data);
 
-      this.user = res.data.user;
-      this.token = res.data.accessToken;
+      this.user = res.data.data.user;
+      this.accessToken = res.data.data.accessToken;
+      this.refreshToken = res.data.data.refreshToken;
 
       localStorage.setItem(
         "accessToken",
-        this.token
+        this.accessToken
+      );
+
+      localStorage.setItem(
+        "refreshToken",
+        this.refreshToken
       );
 
       localStorage.setItem(
         "user",
         JSON.stringify(this.user)
       );
+
+      const userStore = useUserStore();
+      await userStore.getMyInformation();
     },
 
 
@@ -35,24 +46,26 @@ export const useAuthStore = defineStore("auth", {
     },
 
 
-    async refreshToken() {
+    async RefreshToken() {
       const res = await authService.refreshToken();
 
       this.token = res.data.accessToken;
 
       localStorage.setItem(
         "accessToken",
-        this.token
+        this.accessToken
       );
 
     },
 
 
     logout() {
+      this.accessToken = null;
+      this.refreshToken = null;
       this.user = null;
-      this.token = null;
 
       localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
       localStorage.removeItem("user");
     }
   }

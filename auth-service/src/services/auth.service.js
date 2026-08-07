@@ -51,7 +51,7 @@ const login = async (data) => {
     );
 
     if (!isMatch) {
-        throw new Error("Invalid email or password");
+        throw new Error("Invalid password");
     }
 
     const accessToken = jwt.sign(
