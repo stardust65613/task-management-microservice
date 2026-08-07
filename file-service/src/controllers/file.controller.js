@@ -69,7 +69,7 @@ const GetFile = async (req, res, next) => {
 
 const UpdateFile = async (req, res, next) => {
     try {
-        const result = await fileService.UpdateFile(req.params.id, req.body);
+        const result = await fileService.UpdateFile(req.params.id, req.user.id, req.body);
 
         return res.status(200).json({
             success: true,
@@ -83,7 +83,7 @@ const UpdateFile = async (req, res, next) => {
 
 const DeleteFile = async (req, res, next) => {
     try {
-        const result = await fileService.DeleteFile(req.params.id);
+        const result = await fileService.DeleteFile(req.params.id, req.user.id);
 
         return res.status(204).json({
             success: true,

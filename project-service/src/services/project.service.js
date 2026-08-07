@@ -21,12 +21,20 @@ const CreateProject = async (id, data) => {
     }
 
     try {
-        return await projectRepository.createProject({
+        const project = await projectRepository.createProject({
             name,
             description,
             ownerId: id,
             visibility,
         });
+
+        await projectMemberRepository.create({
+            projectId: project.id,
+            userId: id,
+            role: ProjectMemberRole.ADMIN,
+        });
+
+        return project;
     } catch (error) {
         throw error;
     }
@@ -61,6 +69,10 @@ const UpdateProject = async (id, projectId, data) => {
     }
 
     const project = await projectRepository.findById(projectId);
+
+    if (id != project.ownerId){
+        throw new Error("You are not owner of this project");
+    }
 
     if (!project) {
         throw new Error("Project not found");

@@ -2,7 +2,7 @@ const attachmentService = require("../services/task-attachment.service");
 
 const AttachFileToTask = async (req, res, next) => {
     try {
-        const result = await attachmentService.AttachFileToTask(req.params.taskId, req.body.fileId);
+        const result = await attachmentService.AttachFileToTask(req.user.id, req.params.taskId, req.body.fileId);
 
         return res.status(201).json({
             success: true,
@@ -16,7 +16,7 @@ const AttachFileToTask = async (req, res, next) => {
 
 const RemoveFileFromTask = async (req, res, next) => {
     try {
-        const result = await attachmentService.RemoveFileFromTask(req.params.taskId, req.params.fileId);
+        const result = await attachmentService.RemoveFileFromTask(req.user.id, req.params.taskId, req.params.fileId);
 
         return res.status(204).json({
             success: true,
@@ -30,7 +30,7 @@ const RemoveFileFromTask = async (req, res, next) => {
 
 const GetTaskAttachments = async (req, res, next) => {
     try {
-        const result = await attachmentService.GetTaskAttachments(req.params.taskId);
+        const result = await attachmentService.GetTaskAttachments(req.user.id, req.params.taskId);
 
         return res.status(200).json({
             success: true,
