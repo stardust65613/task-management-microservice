@@ -1,5 +1,8 @@
 <script setup>
 import avatar from "@/assets/avatar.png";
+import { useUserStore } from "@/stores/user.store";
+
+const userStore = useUserStore();
 </script>
 <template>
   <header
@@ -38,11 +41,11 @@ import avatar from "@/assets/avatar.png";
 
         <div>
           <p class="font-medium dark:text-gray-100">
-            Dang
+            {{ userStore.user?.username }}
           </p>
 
           <p class="text-xs text-gray-500 dark:text-gray-100">
-            Administrator
+            {{ userStore.user?.email }}
           </p>
         </div>
 

@@ -21,7 +21,6 @@ const handleRegister = async () => {
   }
 
   console.log(form.value);
-  console.log("REGISTER CLICK");
 
   try { 
     await authStore.register({
