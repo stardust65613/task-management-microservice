@@ -60,7 +60,7 @@ const RemoveFileFromTask = async (id, taskId, fileId) => {
         throw new Error("fileId must not be null");
     }
 
-    const attachment = attachmentRepository.findByTaskIdAndFileId(taskId, fileId);
+    const attachment = await attachmentRepository.findByTaskIdAndFileId(taskId, fileId);
 
     if(!attachment){
         throw new Error("attachment not found");

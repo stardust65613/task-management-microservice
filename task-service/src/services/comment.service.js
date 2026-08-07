@@ -56,7 +56,7 @@ const UpdateComment = async (id, commentId, data) => {
 
     const { content } = data;
     
-    const comment = taskCommentRepository.findById(commentId);
+    const comment = await taskCommentRepository.findById(commentId);
 
     if( id != comment.userId){
         throw new Error("Can not edit other's comment");
@@ -70,7 +70,7 @@ const DeleteComment = async (id, commentId) => {
         throw new Error("CommentId must not be null");
     }
 
-    const comment = taskCommentRepository.findById(commnetId);
+    const comment = await taskCommentRepository.findById(commentId);
 
     const task = await taskRepository.findById(comment.taskId);
     
@@ -94,7 +94,7 @@ const GetComment = async (id, commentId) => {
         throw new Error("commentId must not be null");
     }
 
-    const comment = taskCommentRepository.findById(commnetId);
+    const comment = await taskCommentRepository.findById(commentId);
 
     const task = await taskRepository.findById(comment.taskId);
     

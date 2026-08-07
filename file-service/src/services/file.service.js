@@ -152,6 +152,32 @@ const DeleteFile = async(id, userId) => {
     return res;
 };
 
+const deleteFile = async(id) => {
+    const file = await fileRepository.findById(id);
+
+    if (!file) {
+        throw new Error("File not found");
+    }
+
+    await minioClient.removeObject(
+        file.bucket,
+        file.objectName
+    );
+
+    const res = await fileRepository.remove(id);
+
+    await publish(
+        FileEvent.DELETED.exchange,
+        FileEvent.DELETED.routingKey,
+        {
+            fileId:id,
+            uploadedBy:file.uploadedBy,
+        }
+    );
+
+    return res;
+};
+
 const CheckFileExists = async (fileId) => {
 
     const file = await fileRepository.findById(fileId);
@@ -169,6 +195,7 @@ module.exports = {
     GetFile,
     DownloadFile,
     DeleteFile,
+    deleteFile,
     CheckFileExists,
     getFilesByIds,
 }
