@@ -31,7 +31,7 @@ const GetTasksByProject = async (req, res, next) => {
 
 const GetTaskDetail = async (req, res, next) => {
     try {
-        const result = await taskService.GetTaskDetail(req.params.taskId);
+        const result = await taskService.GetTaskDetail(req.user.id, req.params.taskId);
 
         return res.status(200).json({
             success: true,
@@ -45,7 +45,7 @@ const GetTaskDetail = async (req, res, next) => {
 
 const UpdateTask = async (req, res, next) => {
     try {
-        const result = await taskService.UpdateTask(req.params.taskId, req.body);
+        const result = await taskService.UpdateTask(req.user.id, req.params.taskId, req.body);
 
         return res.status(200).json({
             success: true,
@@ -59,7 +59,7 @@ const UpdateTask = async (req, res, next) => {
 
 const DeleteTask = async (req, res, next) => {
     try {
-        const result = await taskService.DeleteTask(req.params.taskId);
+        const result = await taskService.DeleteTask(req.user.id, req.params.taskId);
 
         return res.status(204).json({
             success: true,
@@ -73,7 +73,7 @@ const DeleteTask = async (req, res, next) => {
 
 const AssignTask = async (req, res, next) => {
     try {
-        const result = await taskService.AssignTask(req.params.taskId, req.body.assigneeId);
+        const result = await taskService.AssignTask(req.user.id, req.params.taskId, req.body.assigneeId);
 
         return res.status(200).json({
             success: true,
@@ -87,7 +87,7 @@ const AssignTask = async (req, res, next) => {
 
 const SearchTask = async (req, res, next) => {
     try {
-        const result = await taskService.SearchTasks(req.params.projectId, req.query);
+        const result = await taskService.SearchTasks(req.user.id, req.params.projectId, req.query);
 
         return res.status(200).json({
             success: true,
@@ -101,7 +101,7 @@ const SearchTask = async (req, res, next) => {
 
 const GetTaskByAssignee = async (req, res, next) => {
     try {
-        const result = await taskService.GetTasksByAssignee(req.params.projectId, req.params.userId);
+        const result = await taskService.GetTasksByAssignee(req.user.id, req.params.projectId, req.params.userId);
 
         return res.status(200).json({
             success: true,
@@ -129,7 +129,7 @@ const GetMyTasks = async (req, res, next) => {
 
 const GetOverdueTasks = async (req, res, next) => {
     try {
-        const result = await taskService.GetOverdueTasks(req.params.projectId);
+        const result = await taskService.GetOverdueTasks(req.user.id, req.params.projectId);
 
         return res.status(200).json({
             success: true,
@@ -143,7 +143,7 @@ const GetOverdueTasks = async (req, res, next) => {
 
 const GetTasksStatistics = async (req, res, next) => {
     try {
-        const result = await taskService.GetTasksStatistics(req.params.projectId);
+        const result = await taskService.GetTasksStatistics(req.user.id ,req.params.projectId);
 
         return res.status(200).json({
             success: true,

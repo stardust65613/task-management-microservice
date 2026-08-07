@@ -16,7 +16,7 @@ const AddComment = async (req, res, next) => {
 
 const DeleteComment = async (req, res, next) => {
     try {
-        const result = await commentService.DeleteComment(req.params.commentId);
+        const result = await commentService.DeleteComment(req.user.id, req.params.commentId);
 
         return res.status(201).json({
             success: true,
@@ -30,7 +30,7 @@ const DeleteComment = async (req, res, next) => {
 
 const UpdateComment = async (req, res, next) => {
     try {
-        const result = await commentService.UpdateComment(req.params.commentId, req.body);
+        const result = await commentService.UpdateComment(req.user.id, req.params.commentId, req.body);
 
         return res.status(200).json({
             success: true,
@@ -44,7 +44,7 @@ const UpdateComment = async (req, res, next) => {
 
 const GetComment = async (req, res, next) => {
     try {
-        const result = await commentService.GetComment(req.params.commentId);
+        const result = await commentService.GetComment(req.user.id, req.params.commentId);
 
         return res.status(200).json({
             success: true,
@@ -58,7 +58,7 @@ const GetComment = async (req, res, next) => {
 
 const GetCommentsByTask = async (req, res, next) => {
     try {
-        const result = await commentService.GetAllComment(req.params.taskId);
+        const result = await commentService.GetAllComment(req.user.id, req.params.taskId);
 
         return res.status(200).json({
             success: true,

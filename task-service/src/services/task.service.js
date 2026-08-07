@@ -35,6 +35,18 @@ const CreateTask = async (id, projectId, data) => {
         throw new Error("Invalid task priority");
     }
 
+    const result = await request("project.rpc", {
+        action: "CHECK_PROJECT_MEMBERS",
+        data: {
+            projectId,
+            userIds: [id],
+        },
+    });
+
+    if (result.members.length !== 1) {
+        throw new Error("User was not a member of this project");
+    }
+
     const task = await taskRepository.create({
         createdBy: id,
         projectId,
@@ -57,20 +69,60 @@ const GetTasksByProject = async (id, projectId) => {
         throw new Error("projectId must not be null");
     }
 
+    const result = await request("project.rpc", {
+        action: "CHECK_PROJECT_MEMBERS",
+        data: {
+            projectId,
+            userIds: [id],
+        },
+    });
+
+    if (result.members.length !== 1) {
+        throw new Error("User was not a member of this project");
+    }
+
     return await taskRepository.findByProjectId(projectId);
 };
 
-const GetTaskDetail = async (taskId) => {
+const GetTaskDetail = async (id, taskId) => {
     if(!taskId){
         throw new Error("taskId must not be null");
     }
 
-    return await taskRepository.findById(taskId);
+    const task = await taskRepository.findById(taskId);
+
+    const result = await request("project.rpc", {
+        action: "CHECK_PROJECT_MEMBERS",
+        data: {
+            projectId : task.projectId,
+            userIds: [id],
+        },
+    });
+
+    if (result.members.length !== 1) {
+        throw new Error("User was not a member of this project");
+    }
+
+    return task;
 };
 
-const UpdateTask = async (taskId, data) => {
+const UpdateTask = async (id, taskId, data) => {
     if(!taskId){
         throw new Error("taskId must not be null");
+    }
+
+    const task = await taskRepository.findById(taskId);
+
+    const result = await request("project.rpc", {
+        action: "CHECK_PROJECT_MEMBERS",
+        data: {
+            projectId : task.projectId,
+            userIds: [id],
+        },
+    });
+
+    if (result.members.length !== 1) {
+        throw new Error("User was not a member of this project");
     }
 
     const { title, description, status, priority, dueDate } = data;
@@ -123,21 +175,41 @@ const UpdateTask = async (taskId, data) => {
     return await taskRepository.update(taskId, updateData);
 };
 
-const DeleteTask = async (taskId) => {
+const DeleteTask = async (id, taskId) => {
     if(!taskId){
         throw new Error("taskId must not be null");
+    }
+
+    const task = await taskRepository.findById(taskId);
+
+    const result = await request("project.rpc", {
+        action: "CHECK_PROJECT_MEMBERS",
+        data: {
+            projectId : task.projectId,
+            userIds: [id],
+        },
+    });
+
+    if (result.members.length !== 1) {
+        throw new Error("User was not a member of this project");
     }
 
     return await taskRepository.remove(taskId);
 };
 
-const AssignTask = async (taskId, assigneeId) => {
+const AssignTask = async (id, taskId, assigneeId) => {
     if(!taskId){
         throw new Error("taskId must not be null");
     }
 
     if(!assigneeId){
         throw new Error("assigneeId must not be null");
+    }
+
+    const oldTask = await taskRepository.findById(taskId);
+
+    if(id != oldTask.createdBy){
+        throw new Error("You are not owner of this task");
     }
 
     const task = await taskRepository.update(taskId, {
@@ -178,13 +250,25 @@ const AssignTask = async (taskId, assigneeId) => {
     return task;
 };
 
-const SearchTasks = async (projectId, filters) => {
+const SearchTasks = async (id, projectId, filters) => {
     const {
         keyword,
         status,
         priority,
         assigneeId
     } = filters;
+
+    const result = await request("project.rpc", {
+        action: "CHECK_PROJECT_MEMBERS",
+        data: {
+            projectId,
+            userIds: [id],
+        },
+    });
+
+    if (result.members.length !== 1) {
+        throw new Error("User was not a member of this project");
+    }
 
     return await taskRepository.search(projectId, {
         keyword,
@@ -194,13 +278,25 @@ const SearchTasks = async (projectId, filters) => {
     });
 };
 
-const GetTasksByAssignee = async (projectId, assigneeId) => {
+const GetTasksByAssignee = async (id, projectId, assigneeId) => {
     if(!projectId){
         throw new Error("assigneeId must not be null");
     }
 
     if(!assigneeId){
         throw new Error("assigneeId must not be null");
+    }
+
+    const result = await request("project.rpc", {
+        action: "CHECK_PROJECT_MEMBERS",
+        data: {
+            projectId,
+            userIds: [id],
+        },
+    });
+
+    if (result.members.length !== 1) {
+        throw new Error("User was not a member of this project");
     }
 
     return await taskRepository.findByProjectAndAssignee(projectId, assigneeId);
@@ -214,17 +310,41 @@ const GetMyTasks = async (assigneeId, filters) => {
     return await taskRepository.getMyTasks(assigneeId, filters);
 };
 
-const GetOverdueTasks = async (projectId) => {
+const GetOverdueTasks = async (id, projectId) => {
     if(!projectId){
         throw new Error("projectId must not be null");
+    }
+
+    const result = await request("project.rpc", {
+        action: "CHECK_PROJECT_MEMBERS",
+        data: {
+            projectId,
+            userIds: [id],
+        },
+    });
+
+    if (result.members.length !== 1) {
+        throw new Error("User was not a member of this project");
     }
 
     return await taskRepository.getOverdueTasks(projectId);
 };
 
-const GetTasksStatistics = async (projectId) => {
+const GetTasksStatistics = async (id ,projectId) => {
     if(!projectId){
         throw new Error("assigneeId must not be null");
+    }
+
+    const result = await request("project.rpc", {
+        action: "CHECK_PROJECT_MEMBERS",
+        data: {
+            projectId,
+            userIds: [id],
+        },
+    });
+
+    if (result.members.length !== 1) {
+        throw new Error("User was not a member of this project");
     }
 
     return await taskRepository.getTaskStatistics(projectId);

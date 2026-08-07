@@ -60,7 +60,7 @@ const UploadFile = async (file, uploadedBy, data) => {
     return createdFile;
 };
 
-const UpdateFile = async (id, data) => {
+const UpdateFile = async (id, userId ,data) => {
 
     const file = await fileRepository.findById(id);
 
@@ -76,6 +76,10 @@ const UpdateFile = async (id, data) => {
 
     if (!file) {
         throw new Error("File not found");
+    }
+
+    if(userId != file.uploadedBy){
+        throw new Error("You are not the owner of this file");
     }
 
     const updatedFile = await fileRepository.update(id, {
@@ -118,11 +122,15 @@ const DownloadFile = async (id) => {
     };
 };
 
-const DeleteFile = async(id) => {
+const DeleteFile = async(id, userId) => {
     const file = await fileRepository.findById(id);
 
     if (!file) {
         throw new Error("File not found");
+    }
+
+    if(userId != file.uploadedBy){
+        throw new Error("You are not the owner of this file");
     }
 
     await minioClient.removeObject(

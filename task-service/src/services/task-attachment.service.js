@@ -1,8 +1,9 @@
 const attachmentRepository = require("../repositories/task-attachment.repository");
+const taskRepository = require("../repositories/task.repository");
 const { request } = require("../rabbitmq/rpcClient");
 const { publish } = require("../rabbitmq/publisher");
 
-const AttachFileToTask = async (taskId, fileId) => {
+const AttachFileToTask = async (id, taskId, fileId) => {
     if(!taskId){
         throw new Error("taskId must not be null");
     }
@@ -33,10 +34,24 @@ const AttachFileToTask = async (taskId, fileId) => {
         throw new Error("file does not exist");
     }
 
+    const task = await taskRepository.findById(taskId);
+
+    const res = await request("project.rpc", {
+        action: "CHECK_PROJECT_MEMBERS",
+        data: {
+            projectId : task.projectId,
+            userIds: [id],
+        },
+    });
+
+    if (res.members.length !== 1) {
+        throw new Error("User was not a member of this project");
+    }
+
     return await attachmentRepository.create({taskId, fileId: file.id, uploadedBy: file.uploadedBy, taskId, });
 };
 
-const RemoveFileFromTask = async (taskId, fileId) => {
+const RemoveFileFromTask = async (id, taskId, fileId) => {
     if(!taskId){
         throw new Error("taskId must not be null");
     }
@@ -59,11 +74,39 @@ const RemoveFileFromTask = async (taskId, fileId) => {
         }
     );
 
+    const task = await taskRepository.findById(taskId);
+
+    const result = await request("project.rpc", {
+        action: "CHECK_PROJECT_MEMBERS",
+        data: {
+            projectId : task.projectId,
+            userIds: [id],
+        },
+    });
+
+    if (result.members.length !== 1) {
+        throw new Error("User was not a member of this project");
+    }
+
     return await attachmentRepository.remove(taskId, fileId);
 };
 
 
-const GetTaskAttachments = async (taskId) => {
+const GetTaskAttachments = async (id, taskId) => {
+    const task = await taskRepository.findById(taskId);
+
+    const result = await request("project.rpc", {
+        action: "CHECK_PROJECT_MEMBERS",
+        data: {
+            projectId : task.projectId,
+            userIds: [id],
+        },
+    });
+
+    if (result.members.length !== 1) {
+        throw new Error("User was not a member of this project");
+    }
+
     return await attachmentRepository.findByTaskId(taskId);
 };
 
