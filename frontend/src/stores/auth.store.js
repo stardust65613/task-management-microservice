@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import router from "@/router";
 import { useUserStore } from "./user.store";
 import * as authService from "@/services/auth.service";
 
@@ -67,6 +68,8 @@ export const useAuthStore = defineStore("auth", {
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("user");
+
+      router.push("/auth/login");
     }
   }
 });

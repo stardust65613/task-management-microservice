@@ -124,48 +124,6 @@ defineProps({
         <span>Notifications</span>
       </RouterLink>
 
-
-      <RouterLink
-        to="/profile"
-        class="
-          flex
-          items-center
-          gap-3
-          rounded-lg
-          px-4
-          py-3
-          transition
-          hover:bg-blue-50
-          hover:text-blue-600
-          dark:text-gray-200
-          dark:hover:bg-gray-800
-        "
-      >
-        👤
-        <span>Profile</span>
-      </RouterLink>
-
     </nav>
-
-
-    <!-- Footer -->
-    <div class="border-t p-4 dark:border-gray-700">
-
-      <button
-        class="
-          w-full
-          rounded-lg
-          bg-red-500
-          py-2
-          text-white
-          transition
-          hover:bg-red-600
-        "
-      >
-        Logout
-      </button>
-
-    </div>
-
   </aside>
 </template>

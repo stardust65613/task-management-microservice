@@ -29,14 +29,21 @@ const EditInfomation = async (id, data) => {
         throw new Error("Username must not be null.")
     }
 
-    try {
-        return await userRepository.updateUser(id, { username, firstName, lastName ,});
-    } catch (error) {
-        if (error.code === "P2025") {
-            throw new Error("User not found");
-        }
-        throw error;
+    const user = await userRepository.findById(id);
+
+    if (!user) {
+        throw new Error("User not found");
     }
+
+    if (username) {
+        const existingUser = await userRepository.findByUsername(username);
+
+        if (existingUser && existingUser.id !== id) {
+            throw new Error("Username already exists");
+        }
+    }
+
+    return await userRepository.updateUser(id, { username, firstName, lastName ,});
 }
 
 const CheckUserExists = async (id) => {

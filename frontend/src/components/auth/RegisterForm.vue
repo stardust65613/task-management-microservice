@@ -29,7 +29,7 @@ const handleRegister = async () => {
       password: form.value.password,
     });
   } catch (err) {
-    console.log(err);
+    alert(error.response?.data?.message || "Register failed");
   }
 };
 </script>

@@ -29,6 +29,13 @@ export const useUserStore = defineStore("user", {
 
         this.user = res.data.data;
 
+        localStorage.setItem(
+          "user",
+          JSON.stringify(this.user)
+        );
+
+        return res.data.data;
+
         return res.data.data;
     },
 

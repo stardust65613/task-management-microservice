@@ -26,7 +26,7 @@ const handleLogin = async () => {
     router.push("/");
 
   } catch (err) {
-    console.log(err);
+    alert(error.response?.data?.message || "Login failed");
   }
 };
 </script>

@@ -190,6 +190,7 @@
     >
 
       <button
+        @click="showEditProfile = true"
         class="rounded-lg bg-blue-600 px-5 py-2 font-medium text-white transition hover:bg-blue-700"
       >
         Edit Profile
@@ -197,6 +198,7 @@
 
 
       <button
+        @click="showChangePassword = true"
         class="rounded-lg border border-gray-300 px-5 py-2 font-medium text-gray-700 transition hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
       >
         Change Password
@@ -204,12 +206,28 @@
 
 
       <button
+        @click="showDeleteAccount = true"
         class="rounded-lg bg-red-600 px-5 py-2 font-medium text-white transition hover:bg-red-700"
       >
         Delete Account
       </button>
 
     </div>
+
+    <EditProfileModal
+      v-model="showEditProfile"
+      @updated="handleUpdated"
+    />
+
+
+    <ChangePasswordModal
+      v-model="showChangePassword"
+    />
+
+
+    <DeleteAccountModal
+      v-model="showDeleteAccount"
+    />
 
   </div>
 </template>
@@ -221,20 +239,29 @@ import { useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user.store";
 import { getUserInfo } from "@/services/user.service";
 
+import EditProfileModal from "@/components/profile/EditProfileModal.vue";
+import ChangePasswordModal from "@/components/profile/ChangePasswordModal.vue";
+import DeleteAccountModal from "@/components/profile/DeleteAccountModal.vue";
+
 const route = useRoute();
 const userStore = useUserStore();
 
 const profileUser = ref(null);
 
+const showEditProfile = ref(false);
+const showChangePassword = ref(false);
+const showDeleteAccount = ref(false);
+
+const handleUpdated = (updatedUser) => {
+  profileUser.value = updatedUser;
+};
 
 const isMe = computed(() => {
   return !route.params.id ||
     route.params.id === userStore.user?.id;
 });
 
-
 async function loadProfile() {
-  // Xem profile của mình (route.params.id)
   if (!route.params.id) {
     profileUser.value = userStore.user;
     return;
