@@ -5,7 +5,7 @@ import { useUserStore } from "@/stores/user.store";
 
 const userStore = useUserStore();
 
-const currentPassword = ref("");
+const confirmPassword = ref("");
 const newPassword = ref("");
 
 defineProps({
@@ -29,6 +29,17 @@ const close = () => {
 };
 
 const handleChange = async () => {
+  try{
+    if (confirmPassword.value === newPassword.value){
+      const res = await userStore.changePassword({password: newPassword.value,});
+      alert("Password updated");
+    }
+    else{
+      alert("Password does not match");
+    }
+  } catch (error) {
+    alert(error.response?.data?.message || "Update failed");
+  }
   
 };
 
@@ -51,17 +62,16 @@ const handleChange = async () => {
 
 
       <BaseInput
-        v-model="currentPassword"
-        type="password"
-        placeholder="Current password"
-        class="mb-3"
-      />
-
-
-      <BaseInput 
         v-model="newPassword"
         type="password"
         placeholder="New password"
+        class="mb-3"
+      />
+
+      <BaseInput
+        v-model="confirmPassword"
+        type="password"
+        placeholder="Repeat new password"
         class="mb-5"
       />
 
@@ -77,6 +87,7 @@ const handleChange = async () => {
 
 
         <button
+          @click="handleChange"
           class="rounded-lg bg-blue-600 px-4 py-2 text-white"
         >
           Save

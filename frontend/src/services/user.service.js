@@ -19,3 +19,7 @@ export function deleteAccount() {
 export function getUserInfo(userId) {
   return api.get(`/users/${userId}`);
 }
+
+export function changePassword(data){
+  return api.patch("/users/change-password", data);
+}

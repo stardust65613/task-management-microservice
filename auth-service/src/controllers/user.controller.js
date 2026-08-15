@@ -70,10 +70,25 @@ const DeleteUser = async (req, res, next) => {
     }
 };
 
+const ChangePassword = async (req, res, next) => {
+    try {
+        const result = await userService.ChangePassword(req.user.id, req.body);
+
+        return res.status(200).json({
+            success: true,
+            message: "Password updated successfully",
+            data: result,
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
 module.exports = {
     GetMyInfo,
     GetUserInfo,
     EditInformation,
     UpdateAvatar,
     DeleteUser,
+    ChangePassword,
 }

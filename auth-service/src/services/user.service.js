@@ -1,6 +1,7 @@
 const userRepository = require("../repositories/user.repository");
 const { publish } = require("../rabbitmq/publisher");
 const { request } = require("../rabbitmq/rpcClient");
+const bcrypt = require("bcrypt");
 
 const GetUserInformation = async (id) => {
     const info = await userRepository.findById(id);
@@ -99,6 +100,24 @@ const DeleteUser = async (userId) => {
     return await userRepository.deleteUser(userId);
 };
 
+const ChangePassword = async (id, data) => {
+    const { password } = data;
+
+    if (!password){
+        throw new Error("Password must not be null.")
+    }
+
+    const user = await userRepository.findById(id);
+
+    const hashedPassword = await bcrypt.hash(password, 9);
+
+    if (!user) {
+        throw new Error("User not found");
+    }
+
+    return await userRepository.updateUser(id, { password: hashedPassword, });
+};
+
 module.exports = {
     GetMyInformation,
     GetUserInformation,
@@ -107,4 +126,5 @@ module.exports = {
     getUsersByIds,
     UpdateAvatar,
     DeleteUser,
+    ChangePassword,
 }

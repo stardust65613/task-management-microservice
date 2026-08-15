@@ -16,4 +16,6 @@ router.put("/myavatar", authenticate, userController.UpdateAvatar);
 
 router.delete("/myaccount", authenticate, userController.DeleteUser);
 
+router.patch("/change-password", authenticate, userController.ChangePassword);
+
 module.exports = router;

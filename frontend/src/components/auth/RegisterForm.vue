@@ -28,7 +28,7 @@ const handleRegister = async () => {
       email: form.value.email,
       password: form.value.password,
     });
-  } catch (err) {
+  } catch (error) {
     alert(error.response?.data?.message || "Register failed");
   }
 };

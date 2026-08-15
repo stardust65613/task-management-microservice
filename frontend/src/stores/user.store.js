@@ -61,5 +61,11 @@ export const useUserStore = defineStore("user", {
         return res.data.data;
     },
 
+    async changePassword(data){
+        const res = await userService.changePassword(data);
+        
+        return res.data.data;
+    }
+
   }
 });
