@@ -37,7 +37,7 @@ onMounted(() => {
 
 
 <template>
-  <div class="flex min-h-screen bg-gray-100 dark:bg-gray-900">
+  <div class="flex h-screen overflow-hidden bg-gray-100 dark:bg-gray-900">
 
     <!-- Sidebar -->
     <div
@@ -49,55 +49,17 @@ onMounted(() => {
 
 
     <!-- Right content -->
-    <div class="flex-1">
+    <div class="flex min-w-0 flex-1 flex-col">
 
       <!-- Header luôn nằm trên -->
-      <Header />
-
-
-      <!-- Toolbar -->
-      <div class="flex items-center gap-2 p-4">
-
-        <!-- Sidebar toggle -->
-        <button
-          @click="toggleSidebar"
-          class="
-            rounded-lg
-            bg-gray-200
-            px-3
-            py-2
-            hover:bg-gray-300
-            dark:bg-gray-700
-            dark:hover:bg-gray-600
-            dark:text-white
-          "
-        >
-          ☰
-        </button>
-
-
-        <!-- Dark mode -->
-        <button
-          @click="toggleDarkMode"
-          class="
-            rounded-lg
-            bg-gray-200
-            px-3
-            py-2
-            hover:bg-gray-300
-            dark:bg-gray-700
-            dark:hover:bg-gray-600
-            dark:text-white
-          "
-        >
-          {{ dark ? "☀️" : "🌙" }}
-        </button>
-
-      </div>
-
+      <Header 
+        :dark="dark"
+        @toggle-sidebar="toggleSidebar"
+        @toggle-dark="toggleDarkMode"
+      />
 
       <!-- Page content -->
-      <main class="p-6">
+      <main class="content-scroll flex-1 overflow-y-auto p-6">
         <RouterView />
       </main>
 
