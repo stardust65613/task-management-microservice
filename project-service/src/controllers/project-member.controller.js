@@ -58,7 +58,7 @@ const GetProjectMember = async (req, res, next) => {
 
 const GetCollabProject = async (req, res, next) => {
     try {
-        const result = await projectMemberService.GetCollabProject(req.user.id, req.params.userId);
+        const result = await projectMemberService.GetCollabProject(req.user.id);
 
         return res.status(200).json({
             success: true,

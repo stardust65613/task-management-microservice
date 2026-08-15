@@ -71,25 +71,27 @@ async function RemoveMember(projectId, userId) {
     });
 }
 
-async function GetCollabProject(userId_1, userId_2){
+async function GetCollabProject(userId) {
     const projects = await prisma.project.findMany({
         where: {
+            ownerId: {
+                not: userId,
+            },
+
             members: {
                 some: {
-                    userId: userId_1,
-                },
-            },
-            AND: {
-                members: {
-                    some: {
-                        userId: userId_2,
-                    },
+                    userId,
                 },
             },
         },
+
         select: {
             id: true,
             name: true,
+            description: true,
+            ownerId: true,
+            visibility: true,
+            createdAt: true,
         },
     });
 

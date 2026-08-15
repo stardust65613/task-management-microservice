@@ -11,7 +11,7 @@ router.post("/create", authenticate, projectController.CreateProject);
 
 router.get("/list", authenticate, projectController.GetUserProject);
 
-router.get("/shared/:userId", authenticate, projectMemberController.GetCollabProject);
+router.get("/shared", authenticate, projectMemberController.GetCollabProject);
 
 router.put("/:id", authenticate, projectController.UpdateProject);
 

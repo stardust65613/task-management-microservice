@@ -7,17 +7,12 @@ import LoginView from "@/views/auth/LoginView.vue";
 import RegisterView from "@/views/auth/RegisterView.vue";
 import ProfileView from "@/views/profile/ProfileView.vue";
 import DashboardView from "@/views/dashboard/DashboardView.vue";
+import ProjectListView from "@/views/projects/ProjectListView.vue";
+import ProjectDetailView from "@/views/projects/ProjectDetailView.vue";
 
 import { useAuthStore } from "@/stores/auth.store";
 
 const routes = [
-  /*
-  {
-    path: "/projects",
-    name: "projects",
-    component: ProjectListView,
-  },
-  */
   {
     path: "/",
     component: MainLayout,
@@ -39,6 +34,16 @@ const routes = [
         path: "users/:id",
         name: "user-profile",
         component: ProfileView,
+      },
+      {
+        path: "projects",
+        name: "projects",
+        component: ProjectListView,
+      },
+      {
+        path: "projects/:id",
+        name: "project-detail",
+        component: ProjectDetailView,
       },
     ],
   },

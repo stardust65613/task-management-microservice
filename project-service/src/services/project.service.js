@@ -28,12 +28,6 @@ const CreateProject = async (id, data) => {
             visibility,
         });
 
-        await projectMemberRepository.create({
-            projectId: project.id,
-            userId: id,
-            role: ProjectMemberRole.ADMIN,
-        });
-
         return project;
     } catch (error) {
         throw error;
