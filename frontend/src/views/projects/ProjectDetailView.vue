@@ -45,7 +45,7 @@ function syncMemberRoles() {
 }
 
 async function updateMemberRole(member) {
-  if (!member || updatingMemberId.value) return;
+  if (!member || updatingMemberId.value !== null) return;
 
   const projectId = project.value?.id;
   const userId = member.userId;
@@ -68,20 +68,33 @@ async function updateMemberRole(member) {
   memberSuccess.value = "";
 
   try {
-    await projectStore.updateMember(projectId, userId, {
-      role: newRole,
-    });
+    const updatedMember = await projectStore.updateMember(
+      projectId,
+      userId,
+      { role: newRole }
+    );
 
-    roleDrafts.value[userId] = newRole;
-    memberSuccess.value = `Updated ${member.user.username}'s role successfully.`;
+    const index = projectStore.members.findIndex(
+      (item) => item.userId === userId
+    );
+
+    if (index !== -1) {
+      projectStore.members[index].role = updatedMember.role;
+    }
+
+    roleDrafts.value[userId] = updatedMember.role;
+
+    memberSuccess.value =
+      `Updated ${member.user.username}'s role successfully.`;
+
   } catch (err) {
     memberError.value =
       err?.response?.data?.message ||
       err?.message ||
       "Failed to update member role.";
 
-    // Restore the current role if the API request fails
     roleDrafts.value[userId] = member.role;
+
   } finally {
     updatingMemberId.value = null;
   }
@@ -491,7 +504,7 @@ function createTask() {
         <!-- Member list -->
         <div
           v-else
-          class="mt-5 max-h-[440px] overflow-y-auto
+          class="member-scrollbar mt-5 max-h-[440px] overflow-y-auto
                 divide-y divide-gray-200 rounded-xl
                 border border-gray-200 px-4
                 dark:divide-gray-700 dark:border-gray-700"
@@ -671,3 +684,47 @@ function createTask() {
 
   </div>
 </template>
+
+<style scoped>
+/* Light mode */
+.member-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.member-scrollbar::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 8px;
+}
+
+.member-scrollbar::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 8px;
+}
+
+.member-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Dark mode */
+.dark .member-scrollbar::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+.dark .member-scrollbar::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+.dark .member-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Firefox */
+.member-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db #f3f4f6;
+}
+
+.dark .member-scrollbar {
+  scrollbar-color: #4b5563 #1f2937;
+}
+</style>

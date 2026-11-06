@@ -124,14 +124,6 @@ export const useProjectStore = defineStore("project", {
 
       const member = res.data.data;
 
-      const index = this.members.findIndex(
-        (item) => item.userId === userId
-      );
-
-      if (index !== -1) {
-        this.members[index] = member;
-      }
-
       return member;
     },
 
