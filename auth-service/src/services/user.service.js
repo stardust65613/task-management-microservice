@@ -19,6 +19,30 @@ const GetUserInformation = async (id) => {
     return public_info;
 }
 
+const GetUserInfoByEmail = async (s_email) => {
+    const info = await userRepository.findByEmail(s_email);
+
+    if (!info) {
+        return null;
+    }
+
+    const { id, username, avatar, createdAt, email, isActive } = info;
+
+    const public_info = {
+        id,
+        username,
+        avatar,
+        createdAt,
+        email,
+        isActive,
+    }
+
+    console.log("Public info:", public_info);
+
+    return public_info;
+}
+
+
 const GetMyInformation = async (id) => {
     return await userRepository.findById(id);
 }
@@ -127,4 +151,5 @@ module.exports = {
     UpdateAvatar,
     DeleteUser,
     ChangePassword,
+    GetUserInfoByEmail,
 }

@@ -101,8 +101,6 @@ export const useProjectStore = defineStore("project", {
 
       const member = res.data.data;
 
-      this.members.push(member);
-
       return member;
     },
 

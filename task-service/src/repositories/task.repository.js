@@ -18,15 +18,37 @@ async function findById(id) {
     });
 }
 
-async function findByProjectId(projectId) {
-    return prisma.task.findMany({
-        where: {
-            projectId,
+const findByProjectId = async (projectId, page = 1, limit = 10) => {
+    const skip = (page - 1) * limit;
+
+    const [tasks, total] = await Promise.all([
+        prisma.task.findMany({
+            where: {
+                projectId,
+            },
+            skip,
+            take: limit,
+            orderBy: {
+                createdAt: "desc",
+            },
+        }),
+
+        prisma.task.count({
+            where: {
+                projectId,
+            },
+        }),
+    ]);
+
+    return {
+        tasks,
+        pagination: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
         },
-        orderBy: {
-            createdAt: "desc",
-        },
-    });
+    };
 }
 
 async function findByAssigneeId(assigneeId) {

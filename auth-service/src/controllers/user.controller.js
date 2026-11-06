@@ -28,6 +28,20 @@ const GetUserInfo = async (req, res, next) => {
     }
 };
 
+const GetUserInfoByEmail = async (req, res, next) => {
+    try {
+        const result = await userService.GetUserInfoByEmail(req.query.email);
+
+        return res.status(200).json({
+            success: true,
+            message: "Get user's info successfully",
+            data: result,
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
 const EditInformation = async (req, res, next) => {
     try {
         const result = await userService.EditInfomation(req.user.id, req.body);
@@ -91,4 +105,5 @@ module.exports = {
     UpdateAvatar,
     DeleteUser,
     ChangePassword,
+    GetUserInfoByEmail,
 }

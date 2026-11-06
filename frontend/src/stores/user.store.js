@@ -35,8 +35,6 @@ export const useUserStore = defineStore("user", {
         );
 
         return res.data.data;
-
-        return res.data.data;
     },
 
     async editMyAvatar(data){
@@ -58,6 +56,11 @@ export const useUserStore = defineStore("user", {
     async getUserInfo(userId){
         const res = await userService.getUserInfo(userId);
 
+        return res.data.data;
+    },
+
+    async getUserInfoByEmail(data) {
+        const res = await userService.getUserInfoByEmail(data);
         return res.data.data;
     },
 

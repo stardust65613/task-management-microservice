@@ -7,12 +7,16 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  limit: {
+    type: Number,
+    default: 10,
+  },
 });
 
 const taskStore = useTaskStore();
 
 onMounted(() => {
-  taskStore.getTasksByProject(props.projectId);
+  taskStore.getTasksByProject(props.projectId, 1, props.limit);
 });
 </script>
 

@@ -17,7 +17,22 @@ const CreateTask = async (req, res, next) => {
 
 const GetTasksByProject = async (req, res, next) => {
     try {
-        const result = await taskService.GetTasksByProject(req.user.id, req.params.projectId);
+        const page = Math.max(
+            parseInt(req.query.page) || 1,
+            1
+        );
+
+        const limit = Math.min(
+            Math.max(parseInt(req.query.limit) || 10, 1),
+            100
+        );
+
+        const result = await taskService.GetTasksByProject(
+            req.user.id,
+            req.params.projectId,
+            page,
+            limit
+        );
 
         return res.status(200).json({
             success: true,

@@ -9,6 +9,11 @@ import ProfileView from "@/views/profile/ProfileView.vue";
 import DashboardView from "@/views/dashboard/DashboardView.vue";
 import ProjectListView from "@/views/projects/ProjectListView.vue";
 import ProjectDetailView from "@/views/projects/ProjectDetailView.vue";
+import CreateProjectView from "@/views/projects/CreateProjectView.vue";
+import EditProjectView from "@/views/projects/EditProjectView.vue";
+import ProjectSettingView from "@/views/projects/ProjectSettingView.vue";
+import ProjectTaskView from "@/views/projects/ProjectTaskView.vue";
+
 
 import { useAuthStore } from "@/stores/auth.store";
 
@@ -44,6 +49,26 @@ const routes = [
         path: "projects/:id",
         name: "project-detail",
         component: ProjectDetailView,
+      },
+      {
+        path: "projects/create",
+        name: "project-create",
+        component: CreateProjectView,
+      },
+      {
+        path: "/projects/:id/edit",
+        name: "EditProject",
+        component: EditProjectView,
+      },
+      {
+        path: "/projects/:id/settings",
+        name: "ProjectSettings",
+        component: ProjectSettingView,
+      },
+      {
+        path: "/projects/:id/tasks",
+        name: "ProjectTask",
+        component: ProjectTaskView,
       },
     ],
   },

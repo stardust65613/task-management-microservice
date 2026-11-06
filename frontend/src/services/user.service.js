@@ -4,6 +4,12 @@ export function getMyInfo() {
   return api.get("/users/me");
 }
 
+export function getUserInfoByEmail(data) {
+    return api.get("/users/info", {
+        params: data,
+    });
+}
+
 export function editMyInfo(data) {
   return api.put("/users/me", data);
 }

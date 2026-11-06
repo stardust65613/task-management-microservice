@@ -60,12 +60,12 @@ const CreateTask = async (id, projectId, data) => {
     return task;
 };
 
-const GetTasksByProject = async (id, projectId) => {
-    if(!id){
+const GetTasksByProject = async (id, projectId, page = 1, limit = 10) => {
+    if (!id) {
         throw new Error("UserId must not be null");
     }
 
-    if(!projectId){
+    if (!projectId) {
         throw new Error("projectId must not be null");
     }
 
@@ -81,7 +81,11 @@ const GetTasksByProject = async (id, projectId) => {
         throw new Error("User was not a member of this project");
     }
 
-    return await taskRepository.findByProjectId(projectId);
+    return await taskRepository.findByProjectId(
+        projectId,
+        page,
+        limit
+    );
 };
 
 const GetTaskDetail = async (id, taskId) => {

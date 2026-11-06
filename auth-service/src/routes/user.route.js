@@ -8,6 +8,8 @@ const router = express.Router();
 // Protected APIs
 router.get("/me", authenticate, userController.GetMyInfo);
 
+router.get("/info", authenticate, userController.GetUserInfoByEmail);
+
 router.get("/:id", authenticate, userController.GetUserInfo);
 
 router.put("/me", authenticate, userController.EditInformation);
