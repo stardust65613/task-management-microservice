@@ -4,6 +4,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useTaskStore } from "@/stores/task.store";
 import { useProjectStore } from "@/stores/project.store";
 import * as fileService from "@/services/file.service";
+import FilePreview from "@/components/file/FilePreview.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -37,6 +38,9 @@ const mentionQuery = ref(null);
 const mentionStart = ref(-1);
 
 const selectedMentions = ref([]);
+
+const showFilePreview = ref(false);
+const selectedFile = ref(null);
 
 const form = ref({
   title: "",
@@ -108,23 +112,10 @@ const loadAttachments = async () => {
   try {
     const data = await taskStore.getTaskAttachments(taskId.value);
 
-    attachments.value = await Promise.all(
-      (data ?? []).map(async (attachment) => {
-        try {
-          const response = await fileService.getFile(attachment.fileId);
-
-          return {
-            ...attachment,
-            file: response.data.data,
-          };
-        } catch {
-          return {
-            ...attachment,
-            file: null,
-          };
-        }
-      })
-    );
+    attachments.value = data ?? [];
+  } catch (err) {
+    console.error("Load attachments error:", err);
+    error.value = "Failed to load attachments";
   } finally {
     loadingAttachments.value = false;
   }
@@ -288,6 +279,16 @@ const removeAttachment = async (attachment) => {
   } finally {
     deletingFileId.value = null;
   }
+};
+
+const openFilePreview = (file) => {
+  selectedFile.value = file;
+  showFilePreview.value = true;
+};
+
+const closeFilePreview = () => {
+  showFilePreview.value = false;
+  selectedFile.value = null;
 };
 
 const filteredMembers = computed(() => {
@@ -766,6 +767,18 @@ onMounted(loadTaskDetail);
                 </button>
 
                 <button
+                  v-if="
+                    attachment.file?.mimeType?.startsWith('image/') ||
+                    attachment.file?.mimeType === 'application/pdf'
+                  "
+                  type="button"
+                  @click="openFilePreview(attachment.file)"
+                  class="rounded-lg border border-blue-200 px-3 py-2 text-xs font-medium text-blue-600 hover:bg-blue-50 dark:border-blue-900 dark:text-blue-400 dark:hover:bg-blue-950/40"
+                >
+                  Preview
+                </button>
+
+                <button
                   v-if="!isLocked"
                   type="button"
                   :disabled="deletingFileId === attachment.fileId"
@@ -944,4 +957,11 @@ onMounted(loadTaskDetail);
       </template>
     </div>
   </div>
+
+  <FilePreview
+    :open="showFilePreview"
+    :file="selectedFile"
+    @close="closeFilePreview"
+  />
+
 </template>

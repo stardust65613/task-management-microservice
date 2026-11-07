@@ -189,6 +189,31 @@ const getFilesByIds = async (fileIds) => {
     return fileRepository.findManyByIds(fileIds);
 };
 
+const PreviewFile = async (id) => {
+    const file = await fileRepository.findById(id);
+
+    if (!file) {
+        throw new Error("File not found");
+    }
+
+    const isImage = file.mimeType?.startsWith("image/");
+    const isPdf = file.mimeType === "application/pdf";
+
+    if (!isImage && !isPdf) {
+        throw new Error("This file type does not support preview");
+    }
+
+    const stream = await minioClient.getObject(
+        file.bucket,
+        file.objectName
+    );
+
+    return {
+        stream,
+        metadata: file,
+    };
+};
+
 module.exports = {
     UploadFile,
     UpdateFile,
@@ -198,4 +223,5 @@ module.exports = {
     deleteFile,
     CheckFileExists,
     getFilesByIds,
+    PreviewFile,
 }
