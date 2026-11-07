@@ -106,6 +106,12 @@ const routes = [
         name: "TaskDetail",
         component: TaskDetailView,
       },
+
+      {
+        path: "/tasks/:id",
+        name: "TaskDetail",
+        component: TaskDetailView,
+      },
     ],
   },
 

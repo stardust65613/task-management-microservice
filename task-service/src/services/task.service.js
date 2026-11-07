@@ -199,8 +199,18 @@ const UpdateTask = async (id, taskId, data) => {
     }
 
     // Due date
-    if (dueDate !== undefined) {
-        updateData.dueDate = dueDate;
+    if (data.dueDate !== undefined) {
+        if (data.dueDate === null || data.dueDate === "") {
+            updateData.dueDate = null;
+        } else {
+            const dueDate = new Date(data.dueDate);
+
+            if (Number.isNaN(dueDate.getTime())) {
+                throw new Error("Invalid due date");
+            }
+
+            updateData.dueDate = dueDate;
+        }
     }
 
     if (Object.keys(updateData).length === 0) {

@@ -1,6 +1,7 @@
 
 import { defineStore } from "pinia";
 import * as taskService from "@/services/task.service";
+import * as fileService from "@/services/file.service";
 
 export const useTaskStore = defineStore("task", {
   state: () => ({
@@ -214,6 +215,21 @@ export const useTaskStore = defineStore("task", {
       return updatedTask;
     },
 
+    async getAllTasksByProject(projectId) {
+      try {
+        this.loadingProjectTasks = true;
+
+        const response = await taskService.getAllTasksByProject(projectId);
+        const data = response.data.data;
+
+        this.tasks = Array.isArray(data) ? data : data.tasks ?? [];
+
+        return this.tasks;
+      } finally {
+        this.loadingProjectTasks = false;
+      }
+    },
+
     // ==================== ATTACHMENTS ====================
 
     async attachFileToTask(taskId, data) {
@@ -221,11 +237,38 @@ export const useTaskStore = defineStore("task", {
       return response.data.data;
     },
 
+    async uploadAttachment(taskId, file) {
+      const formData = new FormData();
+
+      formData.append("file", file);
+      formData.append("type", "ATTACHMENT");
+
+      const uploadResponse = await fileService.uploadFile(formData);
+      const fileId = uploadResponse.data.data.id;
+
+      return await this.attachFileToTask(taskId, { fileId });
+    },
+
     async getTaskAttachments(taskId) {
       const response = await taskService.getTaskAttachments(taskId);
 
       this.attachments = response.data.data;
       return this.attachments;
+    },
+
+    async getTaskAttachmentsWithDetails(taskId) {
+      const attachments = await this.getTaskAttachments(taskId);
+
+      return await Promise.all(
+        attachments.map(async (attachment) => {
+          const response = await fileService.getFile(attachment.fileId);
+
+          return {
+            ...attachment,
+            file: response.data.data,
+          };
+        })
+      );
     },
 
     async removeFileFromTask(taskId, fileId) {
@@ -283,21 +326,6 @@ export const useTaskStore = defineStore("task", {
       this.comments = this.comments.filter(
         (comment) => (comment.id ?? comment._id) !== commentId
       );
-    },
-
-    async getAllTasksByProject(projectId) {
-      try {
-        this.loadingProjectTasks = true;
-
-        const response = await taskService.getAllTasksByProject(projectId);
-        const data = response.data.data;
-
-        this.tasks = Array.isArray(data) ? data : data.tasks ?? [];
-
-        return this.tasks;
-      } finally {
-        this.loadingProjectTasks = false;
-      }
     },
   },
 });
