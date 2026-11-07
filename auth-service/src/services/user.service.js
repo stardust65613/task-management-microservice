@@ -88,7 +88,11 @@ const getUsersByIds = async (userIds) => {
 };
 
 const UpdateAvatar = async (userId, fileId) => {
-    // 1. kiểm tra file tồn tại
+    if (!fileId) {
+        throw new Error("fileId must not be null");
+    }
+
+    // 1. Kiểm tra file mới tồn tại
     const result = await request("file.rpc", {
         action: "CHECK_FILE_EXISTS",
         data: { fileId },
@@ -98,22 +102,34 @@ const UpdateAvatar = async (userId, fileId) => {
         throw new Error("File not found");
     }
 
-    // 2. lấy user
+    // 2. Lấy user
     const user = await userRepository.findById(userId);
 
-    const oldAvatar = user.avatarFileId;
+    if (!user) {
+        throw new Error("User not found");
+    }
 
-    // 3. cập nhật avatar
-    await userRepository.updateAvatar(userId, fileId);
+    const oldAvatar = user.avatar;
 
-    // 4. publish event
-    await publish(
-        "user.events",
-        "user.deleted", 
-        {
-            avatarId: oldAvatar,
-        }
-    );
+    if (oldAvatar === fileId) {
+        return user;
+    }
+
+    // 3. Cập nhật avatar mới
+    const updatedUser = await userRepository.updateAvatar(userId, fileId);
+
+    // 4. Xóa avatar cũ nếu tồn tại
+    if (oldAvatar) {
+        await publish(
+            "file.events",
+            "file.deleted",
+            {
+                fileId: oldAvatar,
+            }
+        );
+    }
+
+    return updatedUser;
 };
 
 const DeleteUser = async (userId) => {

@@ -19,10 +19,32 @@
     >
       <div class="flex flex-col items-center gap-5 md:flex-row">
 
-        <img
-          :src="avatar"
-          class="h-28 w-28 rounded-full object-cover"
-        />
+        <div class="relative">
+          <img
+            :src="avatarUrl"
+            class="h-28 w-28 rounded-full border-2 border-gray-200 object-cover dark:border-gray-600"
+            alt="Profile avatar"
+          />
+
+          <button
+            v-if="isMe"
+            type="button"
+            @click="avatarInput.click()"
+            :disabled="uploadingAvatar"
+            class="absolute bottom-0 right-0 rounded-full bg-blue-600 p-2 text-white shadow-md hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            title="Change avatar"
+          >
+            <img :src="editIcon" class="h-5 w-5" alt="Edit" />
+          </button>
+
+          <input
+            ref="avatarInput"
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            class="hidden"
+            @change="handleAvatarChange"
+          />
+        </div>
 
         <div class="flex-1 text-center md:text-left">
 
@@ -233,11 +255,17 @@
 </template>
 
 <script setup>
-import avatar from "@/assets/avatar.png";
-import { ref, computed, onMounted, reactive } from "vue";
+import editIcon from "@/assets/icons/edit.svg";
+import { ref, computed, onMounted, onBeforeUnmount, reactive } from "vue";
+import * as fileService from "@/services/file.service";
+import defaultAvatar from "@/assets/avatar.png";
 import { useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user.store";
-import { getUserInfo } from "@/services/user.service";
+import {
+  getUserInfo,
+  getMyInfo,
+  editMyAvatar,
+} from "@/services/user.service";
 
 import EditProfileModal from "@/components/profile/EditProfileModal.vue";
 import ChangePasswordModal from "@/components/profile/ChangePasswordModal.vue";
@@ -252,6 +280,10 @@ const showEditProfile = ref(false);
 const showChangePassword = ref(false);
 const showDeleteAccount = ref(false);
 
+const avatarInput = ref(null);
+const previewAvatar = ref(null);
+const avatarUrl = ref(defaultAvatar);
+
 const handleUpdated = (updatedUser) => {
   profileUser.value = updatedUser;
 };
@@ -262,15 +294,26 @@ const isMe = computed(() => {
 });
 
 async function loadProfile() {
-  if (!route.params.id) {
-    profileUser.value = userStore.user;
-    return;
+  try {
+    if (!route.params.id || route.params.id === userStore.user?.id) {
+      const res = await getMyInfo();
+
+      profileUser.value = res.data.data ?? res.data;
+
+      // Đồng bộ Pinia
+      userStore.user = {
+        ...userStore.user,
+        ...profileUser.value,
+      };
+    } else {
+      const res = await getUserInfo(route.params.id);
+      profileUser.value = res.data.data ?? res.data;
+    }
+
+    await loadAvatar();
+  } catch (err) {
+    console.error("Load profile error:", err);
   }
-
-  const res = await getUserInfo(route.params.id);
-
-  profileUser.value = res.data;
-
 }
 
 const statistics = reactive({
@@ -279,7 +322,104 @@ const statistics = reactive({
   completed: 15,
 });
 
+const uploadingAvatar = ref(false);
+
+const handleAvatarChange = async (event) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  const allowedTypes = ["image/png", "image/jpeg", "image/webp"];
+
+  if (!allowedTypes.includes(file.type)) {
+    alert("Please select PNG, JPEG or WebP image");
+    event.target.value = "";
+    return;
+  }
+
+  // Preview ảnh
+  if (avatarUrl.value.startsWith("blob:")) {
+    URL.revokeObjectURL(avatarUrl.value);
+  }
+
+  avatarUrl.value = URL.createObjectURL(file);
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("type", "AVATAR");
+
+  uploadingAvatar.value = true;
+
+  try {
+    // Upload ảnh
+    const uploadRes = await fileService.uploadFile(formData);
+    const uploadedFile = uploadRes.data?.data ?? uploadRes.data;
+
+    const fileId = uploadedFile.id;
+
+    if (!fileId) {
+      throw new Error("File ID not found in upload response");
+    }
+
+    // Cập nhật avatar
+    const updateRes = await editMyAvatar({ fileId });
+
+    profileUser.value = {
+      ...profileUser.value,
+      avatar: fileId,
+    };
+
+    if (isMe.value && userStore.user) {
+      userStore.user.avatar = fileId;
+    }
+
+    console.log("Update avatar response:", updateRes.data);
+  } catch (err) {
+    console.error("Avatar upload error:", err);
+
+    alert(
+      err.response?.data?.message ||
+      err.message ||
+      "Failed to update avatar"
+    );
+
+    await loadAvatar();
+  } finally {
+    uploadingAvatar.value = false;
+    event.target.value = "";
+  }
+};
+
+const loadAvatar = async () => {
+  if (avatarUrl.value.startsWith("blob:")) {
+    URL.revokeObjectURL(avatarUrl.value);
+  }
+
+  avatarUrl.value = defaultAvatar;
+
+  if (!profileUser.value?.avatar) return;
+
+  try {
+    const response = await fileService.previewFile(
+      profileUser.value.avatar
+    );
+
+    avatarUrl.value = URL.createObjectURL(response.data);
+  } catch (err) {
+    console.error("Failed to load avatar:", err);
+  }
+};
+
 onMounted(() => {
   loadProfile();
+});
+
+onBeforeUnmount(() => {
+  if (avatarUrl.value.startsWith("blob:")) {
+    URL.revokeObjectURL(avatarUrl.value);
+  }
+
+  if (previewAvatar.value) {
+    URL.revokeObjectURL(previewAvatar.value);
+  }
 });
 </script>
