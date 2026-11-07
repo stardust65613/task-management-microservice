@@ -12,6 +12,7 @@ const notificationRoutes = require("./notification.route");
 const router = express.Router();
 
 router.use("/projects/:projectId/tasks", taskProjectRoutes);
+router.use("/projects/:projectId/all", taskProjectRoutes);
 router.use("/notifications", notificationRoutes);
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);

@@ -88,6 +88,30 @@ const GetTasksByProject = async (id, projectId, page = 1, limit = 10) => {
     );
 };
 
+const GetAllTasksByProject = async (id, projectId) => {
+    if (!id) {
+        throw new Error("UserId must not be null");
+    }
+
+    if (!projectId) {
+        throw new Error("projectId must not be null");
+    }
+
+    const result = await request("project.rpc", {
+        action: "CHECK_PROJECT_MEMBERS",
+        data: {
+            projectId,
+            userIds: [id],
+        },
+    });
+
+    if (result.members.length !== 1) {
+        throw new Error("User was not a member of this project");
+    }
+
+    return await taskRepository.findAllByProjectId(projectId);
+};
+
 const GetTaskDetail = async (id, taskId) => {
     if(!taskId){
         throw new Error("taskId must not be null");
@@ -111,16 +135,25 @@ const GetTaskDetail = async (id, taskId) => {
 };
 
 const UpdateTask = async (id, taskId, data) => {
-    if(!taskId){
+    if (!taskId) {
         throw new Error("taskId must not be null");
     }
 
     const task = await taskRepository.findById(taskId);
 
+    if (!task) {
+        throw new Error("Task not found");
+    }
+
+    // Prevent updating completed or cancelled tasks
+    if ([TaskStatus.DONE, TaskStatus.CANCELLED].includes(task.status)) {
+        throw new Error("Cannot update a completed or cancelled task");
+    }
+
     const result = await request("project.rpc", {
         action: "CHECK_PROJECT_MEMBERS",
         data: {
-            projectId : task.projectId,
+            projectId: task.projectId,
             userIds: [id],
         },
     });
@@ -131,44 +164,41 @@ const UpdateTask = async (id, taskId, data) => {
 
     const { title, description, status, priority, dueDate } = data;
 
-    if(!title){
-        throw new Error("Title must not be null");
-    }
-
-    if(
-        status !== undefined &&
-        status !== null &&
-        !Object.values(TaskStatus).includes(status)
-    ){
-        throw new Error("Invalid task status");
-    }
-
-    if(
-        priority !== undefined &&
-        priority !== null &&
-        !Object.values(TaskPriority).includes(priority)
-    ){
-        throw new Error("Invalid task priority");
-    }
-
     const updateData = {};
 
+    // Title
     if (title !== undefined) {
-        updateData.title = title;
+        if (typeof title !== "string" || !title.trim()) {
+            throw new Error("Title must not be empty");
+        }
+
+        updateData.title = title.trim();
     }
 
+    // Description
     if (description !== undefined) {
         updateData.description = description;
     }
 
+    // Status
     if (status !== undefined) {
+        if (!Object.values(TaskStatus).includes(status)) {
+            throw new Error("Invalid task status");
+        }
+
         updateData.status = status;
     }
 
+    // Priority
     if (priority !== undefined) {
+        if (!Object.values(TaskPriority).includes(priority)) {
+            throw new Error("Invalid task priority");
+        }
+
         updateData.priority = priority;
     }
 
+    // Due date
     if (dueDate !== undefined) {
         updateData.dueDate = dueDate;
     }
@@ -176,6 +206,7 @@ const UpdateTask = async (id, taskId, data) => {
     if (Object.keys(updateData).length === 0) {
         throw new Error("No fields to update");
     }
+
     return await taskRepository.update(taskId, updateData);
 };
 
@@ -444,4 +475,5 @@ module.exports = {
     GetOverdueTasks,
     GetTasksStatistics,
     CompleteTask,
+    GetAllTasksByProject,
 }

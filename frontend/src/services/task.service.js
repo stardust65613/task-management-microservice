@@ -15,6 +15,12 @@ export function getTasksByProject(projectId, page = 1, limit = 10) {
   });
 }
 
+export function getAllTasksByProject(projectId) {
+  return api.get(
+    `/projects/${projectId}/all`
+  );
+};
+
 // Search tasks in project
 export function searchTasks(projectId, params = {}) {
   return api.get(`/projects/${projectId}/tasks/search`, {

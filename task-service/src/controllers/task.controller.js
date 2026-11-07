@@ -184,6 +184,29 @@ const CompleteTask = async (req, res, next) => {
     }
 }
 
+const getAllTasksByProject = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { projectId } = req.params;
+
+        const tasks = await taskService.GetAllTasksByProject(
+            userId,
+            projectId
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "All task's status updated successfully",
+            data: tasks,
+        });
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
 module.exports = {
     CreateTask,
     GetTasksByProject,
@@ -197,4 +220,5 @@ module.exports = {
     GetOverdueTasks,
     GetTasksStatistics,
     CompleteTask,
+    getAllTasksByProject,
 }

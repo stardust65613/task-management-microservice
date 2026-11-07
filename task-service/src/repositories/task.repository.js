@@ -51,6 +51,17 @@ const findByProjectId = async (projectId, page = 1, limit = 10) => {
     };
 }
 
+const findAllByProjectId = async (projectId) => {
+    return await prisma.task.findMany({
+        where: {
+            projectId,
+        },
+        orderBy: {
+            createdAt: "desc",
+        },
+    });
+};
+
 async function findByAssigneeId(assigneeId) {
     return prisma.task.findMany({
         where: {
@@ -284,4 +295,5 @@ module.exports = {
     getOverdueTasks,
     getTaskStatistics,
     deleteByProjectId,
+    findAllByProjectId,
 };

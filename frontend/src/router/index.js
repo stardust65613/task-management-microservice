@@ -13,7 +13,9 @@ import CreateProjectView from "@/views/projects/CreateProjectView.vue";
 import EditProjectView from "@/views/projects/EditProjectView.vue";
 import ProjectSettingView from "@/views/projects/ProjectSettingView.vue";
 import ProjectTaskView from "@/views/projects/ProjectTaskView.vue";
-
+import ProjectOverviewView from "@/views/projects/ProjectOverview.vue";
+import TaskDetailView from "@/views/tasks/TaskDetailView.vue";
+import CreateTaskView from "@/views/tasks/CreateTaskView.vue";
 
 import { useAuthStore } from "@/stores/auth.store";
 
@@ -25,11 +27,14 @@ const routes = [
       requiresAuth: true,
     },
     children: [
+      // Dashboard
       {
         path: "",
         name: "dashboard",
         component: DashboardView,
       },
+
+      // Profile
       {
         path: "profile",
         name: "profile",
@@ -40,39 +45,71 @@ const routes = [
         name: "user-profile",
         component: ProfileView,
       },
+
+      // Project List
       {
         path: "projects",
         name: "projects",
         component: ProjectListView,
       },
       {
-        path: "projects/:id",
-        name: "project-detail",
-        component: ProjectDetailView,
-      },
-      {
         path: "projects/create",
         name: "project-create",
         component: CreateProjectView,
       },
+
+      // Project Detail
       {
-        path: "/projects/:id/edit",
+        path: "projects/:id",
+        component: ProjectDetailView,
+        redirect: (to) => ({
+          name: "project-overview",
+          params: { id: to.params.id },
+        }),
+        children: [
+          {
+            path: "overview",
+            name: "project-overview",
+            component: ProjectOverviewView,
+          },
+          {
+            path: "tasks",
+            name: "project-tasks",
+            component: ProjectTaskView,
+          },
+        ],
+      },
+
+      // Edit Project
+      {
+        path: "projects/:id/edit",
         name: "EditProject",
         component: EditProjectView,
       },
+
+      // Project Settings
       {
-        path: "/projects/:id/settings",
+        path: "projects/:id/settings",
         name: "ProjectSettings",
         component: ProjectSettingView,
       },
+
+      // Create Task
       {
-        path: "/projects/:id/tasks",
-        name: "ProjectTask",
-        component: ProjectTaskView,
+        path: "projects/:id/tasks/create",
+        name: "ProjectTaskCreate",
+        component: CreateTaskView,
+      },
+
+      {
+        path: "tasks/:id",
+        name: "TaskDetail",
+        component: TaskDetailView,
       },
     ],
   },
 
+  // Authentication
   {
     path: "/auth",
     component: AuthLayout,

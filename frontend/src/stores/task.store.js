@@ -20,6 +20,7 @@ export const useTaskStore = defineStore("task", {
     mentions: [],
 
     loading: false,
+    loadingProjectTasks: false,
   }),
 
   actions: {
@@ -282,6 +283,21 @@ export const useTaskStore = defineStore("task", {
       this.comments = this.comments.filter(
         (comment) => (comment.id ?? comment._id) !== commentId
       );
+    },
+
+    async getAllTasksByProject(projectId) {
+      try {
+        this.loadingProjectTasks = true;
+
+        const response = await taskService.getAllTasksByProject(projectId);
+        const data = response.data.data;
+
+        this.tasks = Array.isArray(data) ? data : data.tasks ?? [];
+
+        return this.tasks;
+      } finally {
+        this.loadingProjectTasks = false;
+      }
     },
   },
 });
