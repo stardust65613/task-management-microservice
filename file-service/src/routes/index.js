@@ -7,6 +7,8 @@ const router = express.Router();
 
 router.post("/upload", authenticate, upload.single("file"), fileController.UploadFile);
 
+router.get("/:id/preview", authenticate, fileController.PreviewFile);
+
 router.get("/:id/download", authenticate, fileController.DownloadFile);
 
 router.get("/:id", authenticate, fileController.GetFile);

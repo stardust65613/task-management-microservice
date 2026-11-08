@@ -152,6 +152,32 @@ const DeleteFile = async(id, userId) => {
     return res;
 };
 
+const deleteFile = async(id) => {
+    const file = await fileRepository.findById(id);
+
+    if (!file) {
+        throw new Error("File not found");
+    }
+
+    await minioClient.removeObject(
+        file.bucket,
+        file.objectName
+    );
+
+    const res = await fileRepository.remove(id);
+
+    await publish(
+        FileEvent.DELETED.exchange,
+        FileEvent.DELETED.routingKey,
+        {
+            fileId:id,
+            uploadedBy:file.uploadedBy,
+        }
+    );
+
+    return res;
+};
+
 const CheckFileExists = async (fileId) => {
 
     const file = await fileRepository.findById(fileId);
@@ -163,12 +189,39 @@ const getFilesByIds = async (fileIds) => {
     return fileRepository.findManyByIds(fileIds);
 };
 
+const PreviewFile = async (id) => {
+    const file = await fileRepository.findById(id);
+
+    if (!file) {
+        throw new Error("File not found");
+    }
+
+    const isImage = file.mimeType?.startsWith("image/");
+    const isPdf = file.mimeType === "application/pdf";
+
+    if (!isImage && !isPdf) {
+        throw new Error("This file type does not support preview");
+    }
+
+    const stream = await minioClient.getObject(
+        file.bucket,
+        file.objectName
+    );
+
+    return {
+        stream,
+        metadata: file,
+    };
+};
+
 module.exports = {
     UploadFile,
     UpdateFile,
     GetFile,
     DownloadFile,
     DeleteFile,
+    deleteFile,
     CheckFileExists,
     getFilesByIds,
+    PreviewFile,
 }

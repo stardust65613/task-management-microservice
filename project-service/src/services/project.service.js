@@ -28,12 +28,6 @@ const CreateProject = async (id, data) => {
             visibility,
         });
 
-        await projectMemberRepository.create({
-            projectId: project.id,
-            userId: id,
-            role: ProjectMemberRole.ADMIN,
-        });
-
         return project;
     } catch (error) {
         throw error;
@@ -86,9 +80,7 @@ const UpdateProject = async (id, projectId, data) => {
 };
 
 const GetProjectsByUser = async (id) => {
-    const project = await projectRepository.GetAllProjectsJoined(id);
-
-    return project;
+    return await projectRepository.GetOwnProjects(id);
 };
 
 const GetProject = async (id, projectId) => {
@@ -141,6 +133,22 @@ const DeleteProjectsByOwner = async (ownerId) => {
     }
 };
 
+const GetProjectStatistics = async (userId) => {
+    if (!userId) {
+        throw new Error("userId must not be null");
+    }
+
+    return await projectRepository.getProjectStatistics(userId);
+};
+
+const GetUserProjectIds = async (userId) => {
+    if (!userId) {
+        throw new Error("userId must not be null");
+    }
+
+    return await projectRepository.getUserProjectIds(userId);
+};
+
 module.exports = {
     CreateProject,
     UpdateProject,
@@ -148,4 +156,6 @@ module.exports = {
     GetProject,
     DeleteProject,
     DeleteProjectsByOwner,
+    GetProjectStatistics,
+    GetUserProjectIds,
 }

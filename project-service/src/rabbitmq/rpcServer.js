@@ -31,6 +31,17 @@ const startRPCServer = async () => {
                 response = await projectService.GetProject(request.data.userId,request.data.projectId);
                 break;
             
+            case "GET_PROJECT_STATISTICS":
+                response = await projectService.GetProjectStatistics(
+                    request.data.userId
+                );
+                break;
+
+            case "GET_USER_PROJECT_IDS":
+                response = await projectService.GetUserProjectIds(
+                    request.data.userId
+                );
+                break;
 
             default:
 

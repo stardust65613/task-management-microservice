@@ -6,7 +6,7 @@ services:
     depends_on:
     - postgres
     - rabbitmq
-    - minio
+    - rustfs
     - redis
     container_name: gateway
     ports:
@@ -22,7 +22,7 @@ services:
     depends_on:
     - postgres
     - rabbitmq
-    - minio
+    - rustfs
     - redis
     container_name: auth-service
     ports:
@@ -38,7 +38,7 @@ services:
     depends_on:
     - postgres
     - rabbitmq
-    - minio
+    - rustfs
     - redis
     container_name: project-service
     ports:
@@ -54,7 +54,7 @@ services:
     depends_on:
     - postgres
     - rabbitmq
-    - minio
+    - rustfs
     - redis
     container_name: task-service
     ports:
@@ -70,7 +70,7 @@ services:
     depends_on:
     - postgres
     - rabbitmq
-    - minio
+    - rustfs
     - redis
     container_name: file-service
     ports:
@@ -86,7 +86,7 @@ services:
     depends_on:
     - postgres
     - rabbitmq
-    - minio
+    - rustfs
     - redis
     container_name: notification-service
     ports:
@@ -95,6 +95,18 @@ services:
       - ./notification-service/.env
     volumes:
       - ./notification-service:/app
+      - /app/node_modules
+
+  frontend:
+    build: ./frontend
+    command: npm run dev -- --host 0.0.0.0
+    depends_on:
+    - auth-service
+    container_name: frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
       - /app/node_modules
 
   postgres:
@@ -145,33 +157,32 @@ services:
 
       - "15672:15672"
 
-  minio:
+  rustfs:
 
-    image: minio/minio
+    image: rustfs/rustfs:latest
+    container_name: rustfs
+    restart: unless-stopped
 
-    container_name: minio
-
-    command: server /data --console-address ":9001"
+    command: /data
 
     environment:
-
-      MINIO_ROOT_USER: minioadmin
-
-      MINIO_ROOT_PASSWORD: minioadmin
+      RUSTFS_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      RUSTFS_SECRET_KEY: ${MINIO_SECRET_KEY}
+      RUSTFS_ADDRESS: ":9000"
+      RUSTFS_CONSOLE_ADDRESS: ":9001"
+      RUSTFS_CONSOLE_ENABLE: "true"
+      RUSTFS_OBS_LOGGER_LEVEL: error
 
     ports:
-
       - "9000:9000"
-
       - "9001:9001"
 
     volumes:
-
-      - minio_data:/data
+      - rustfs_data:/data
 
 volumes:
 
   postgres_data:
 
-  minio_data:
+  rustfs_data:
 

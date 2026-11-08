@@ -1,6 +1,7 @@
 const userRepository = require("../repositories/user.repository");
 const { publish } = require("../rabbitmq/publisher");
 const { request } = require("../rabbitmq/rpcClient");
+const bcrypt = require("bcrypt");
 
 const GetUserInformation = async (id) => {
     const info = await userRepository.findById(id);
@@ -18,6 +19,30 @@ const GetUserInformation = async (id) => {
     return public_info;
 }
 
+const GetUserInfoByEmail = async (s_email) => {
+    const info = await userRepository.findByEmail(s_email);
+
+    if (!info) {
+        return null;
+    }
+
+    const { id, username, avatar, createdAt, email, isActive } = info;
+
+    const public_info = {
+        id,
+        username,
+        avatar,
+        createdAt,
+        email,
+        isActive,
+    }
+
+    console.log("Public info:", public_info);
+
+    return public_info;
+}
+
+
 const GetMyInformation = async (id) => {
     return await userRepository.findById(id);
 }
@@ -29,14 +54,21 @@ const EditInfomation = async (id, data) => {
         throw new Error("Username must not be null.")
     }
 
-    try {
-        return await userRepository.updateUser(id, { username, firstName, lastName ,});
-    } catch (error) {
-        if (error.code === "P2025") {
-            throw new Error("User not found");
-        }
-        throw error;
+    const user = await userRepository.findById(id);
+
+    if (!user) {
+        throw new Error("User not found");
     }
+
+    if (username) {
+        const existingUser = await userRepository.findByUsername(username);
+
+        if (existingUser && existingUser.id !== id) {
+            throw new Error("Username already exists");
+        }
+    }
+
+    return await userRepository.updateUser(id, { username, firstName, lastName ,});
 }
 
 const CheckUserExists = async (id) => {
@@ -56,7 +88,11 @@ const getUsersByIds = async (userIds) => {
 };
 
 const UpdateAvatar = async (userId, fileId) => {
-    // 1. kiểm tra file tồn tại
+    if (!fileId) {
+        throw new Error("fileId must not be null");
+    }
+
+    // 1. Kiểm tra file mới tồn tại
     const result = await request("file.rpc", {
         action: "CHECK_FILE_EXISTS",
         data: { fileId },
@@ -66,22 +102,34 @@ const UpdateAvatar = async (userId, fileId) => {
         throw new Error("File not found");
     }
 
-    // 2. lấy user
+    // 2. Lấy user
     const user = await userRepository.findById(userId);
 
-    const oldAvatar = user.avatarFileId;
+    if (!user) {
+        throw new Error("User not found");
+    }
 
-    // 3. cập nhật avatar
-    await userRepository.updateAvatar(userId, fileId);
+    const oldAvatar = user.avatar;
 
-    // 4. publish event
-    await publish(
-        "user.events",
-        "user.deleted", 
-        {
-            avatarId: oldAvatar,
-        }
-    );
+    if (oldAvatar === fileId) {
+        return user;
+    }
+
+    // 3. Cập nhật avatar mới
+    const updatedUser = await userRepository.updateAvatar(userId, fileId);
+
+    // 4. Xóa avatar cũ nếu tồn tại
+    if (oldAvatar) {
+        await publish(
+            "file.events",
+            "file.deleted",
+            {
+                fileId: oldAvatar,
+            }
+        );
+    }
+
+    return updatedUser;
 };
 
 const DeleteUser = async (userId) => {
@@ -92,6 +140,59 @@ const DeleteUser = async (userId) => {
     return await userRepository.deleteUser(userId);
 };
 
+const ChangePassword = async (id, data) => {
+    const { password } = data;
+
+    if (!password){
+        throw new Error("Password must not be null.")
+    }
+
+    const user = await userRepository.findById(id);
+
+    const hashedPassword = await bcrypt.hash(password, 9);
+
+    if (!user) {
+        throw new Error("User not found");
+    }
+
+    return await userRepository.updateUser(id, { password: hashedPassword, });
+};
+
+const GetUserDashboardStatistics = async (userId) => {
+    if (!userId) {
+        throw new Error("userId must not be null");
+    }
+
+    const { projectIds } = await request("project.rpc", {
+        action: "GET_USER_PROJECT_IDS",
+        data: {
+            userId,
+        },
+    });
+
+    const [projectStats, taskStats] = await Promise.all([
+        request("project.rpc", {
+            action: "GET_PROJECT_STATISTICS",
+            data: {
+                userId,
+            },
+        }),
+
+        request("task.rpc", {
+            action: "GET_USER_TASKS_STATISTICS",
+            data: {
+                userId,
+                projectIds,
+            },
+        }),
+    ]);
+
+    return {
+        ...projectStats,
+        ...taskStats,
+    };
+};
+
 module.exports = {
     GetMyInformation,
     GetUserInformation,
@@ -100,4 +201,7 @@ module.exports = {
     getUsersByIds,
     UpdateAvatar,
     DeleteUser,
+    ChangePassword,
+    GetUserInfoByEmail,
+    GetUserDashboardStatistics,
 }

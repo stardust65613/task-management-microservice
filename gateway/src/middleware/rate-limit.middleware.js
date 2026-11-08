@@ -6,7 +6,7 @@ const rateLimit = require("express-rate-limit");
  */
 const globalRateLimit = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 phút
-    max: 100,
+    max: 200,
 
     standardHeaders: true, // RateLimit-* headers
     legacyHeaders: false,

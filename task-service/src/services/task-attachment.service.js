@@ -60,7 +60,7 @@ const RemoveFileFromTask = async (id, taskId, fileId) => {
         throw new Error("fileId must not be null");
     }
 
-    const attachment = attachmentRepository.findByTaskIdAndFileId(taskId, fileId);
+    const attachment = await attachmentRepository.findByTaskIdAndFileId(taskId, fileId);
 
     if(!attachment){
         throw new Error("attachment not found");
@@ -91,14 +91,17 @@ const RemoveFileFromTask = async (id, taskId, fileId) => {
     return await attachmentRepository.remove(taskId, fileId);
 };
 
-
 const GetTaskAttachments = async (id, taskId) => {
     const task = await taskRepository.findById(taskId);
+
+    if (!task) {
+        throw new Error("Task not found");
+    }
 
     const result = await request("project.rpc", {
         action: "CHECK_PROJECT_MEMBERS",
         data: {
-            projectId : task.projectId,
+            projectId: task.projectId,
             userIds: [id],
         },
     });
@@ -107,7 +110,27 @@ const GetTaskAttachments = async (id, taskId) => {
         throw new Error("User was not a member of this project");
     }
 
-    return await attachmentRepository.findByTaskId(taskId);
+    // Lấy danh sách attachment
+    const attachments = await attachmentRepository.findByTaskId(taskId);
+
+    // Lấy metadata của từng file từ File Service
+    const attachmentsWithFiles = await Promise.all(
+        attachments.map(async (attachment) => {
+            const file = await request("file.rpc", {
+                action: "GET_FILE_INFO",
+                data: {
+                    fileId: attachment.fileId,
+                },
+            });
+
+            return {
+                ...attachment,
+                file: file || null,
+            };
+        })
+    );
+
+    return attachmentsWithFiles;
 };
 
 module.exports = {

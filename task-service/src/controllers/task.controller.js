@@ -17,7 +17,22 @@ const CreateTask = async (req, res, next) => {
 
 const GetTasksByProject = async (req, res, next) => {
     try {
-        const result = await taskService.GetTasksByProject(req.user.id, req.params.projectId);
+        const page = Math.max(
+            parseInt(req.query.page) || 1,
+            1
+        );
+
+        const limit = Math.min(
+            Math.max(parseInt(req.query.limit) || 10, 1),
+            100
+        );
+
+        const result = await taskService.GetTasksByProject(
+            req.user.id,
+            req.params.projectId,
+            page,
+            limit
+        );
 
         return res.status(200).json({
             success: true,
@@ -169,6 +184,46 @@ const CompleteTask = async (req, res, next) => {
     }
 }
 
+const getAllTasksByProject = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { projectId } = req.params;
+
+        const tasks = await taskService.GetAllTasksByProject(
+            userId,
+            projectId
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "All task's status updated successfully",
+            data: tasks,
+        });
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
+const GetRecentTasks = async (req, res, next) => {
+    try {
+        const result = await taskService.GetRecentTasks(
+            req.user.id,
+            Number(req.query.limit) || 5
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Get recent tasks successfully",
+            data: result,
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
 module.exports = {
     CreateTask,
     GetTasksByProject,
@@ -182,4 +237,6 @@ module.exports = {
     GetOverdueTasks,
     GetTasksStatistics,
     CompleteTask,
+    getAllTasksByProject,
+    GetRecentTasks,
 }

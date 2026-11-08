@@ -28,6 +28,20 @@ const GetUserInfo = async (req, res, next) => {
     }
 };
 
+const GetUserInfoByEmail = async (req, res, next) => {
+    try {
+        const result = await userService.GetUserInfoByEmail(req.query.email);
+
+        return res.status(200).json({
+            success: true,
+            message: "Get user's info successfully",
+            data: result,
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
 const EditInformation = async (req, res, next) => {
     try {
         const result = await userService.EditInfomation(req.user.id, req.body);
@@ -70,10 +84,43 @@ const DeleteUser = async (req, res, next) => {
     }
 };
 
+const ChangePassword = async (req, res, next) => {
+    try {
+        const result = await userService.ChangePassword(req.user.id, req.body);
+
+        return res.status(200).json({
+            success: true,
+            message: "Password updated successfully",
+            data: result,
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+const GetUserDashboardStatistics = async (req, res, next) => {
+    try {
+        const result = await userService.GetUserDashboardStatistics(
+            req.user.id
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Get user's dashboard statistics successfully",
+            data: result,
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
 module.exports = {
     GetMyInfo,
     GetUserInfo,
     EditInformation,
     UpdateAvatar,
     DeleteUser,
+    ChangePassword,
+    GetUserInfoByEmail,
+    GetUserDashboardStatistics,
 }

@@ -4,10 +4,12 @@ const taskController = require("../controllers/task.controller");
 const router = express.Router();
 
 router.post("/projects/:projectId/tasks", taskController.CreateTask);
+router.get("/projects/:projectId/all", taskController.getAllTasksByProject);
 router.get("/projects/:projectId/tasks", taskController.GetTasksByProject);
 router.get("/projects/:projectId/tasks/search", taskController.SearchTask);
 router.get("/projects/:projectId/tasks/assignee/:userId", taskController.GetTaskByAssignee);
 router.get("/tasks/my", taskController.GetMyTasks);
+router.get("/tasks/recent", taskController.GetRecentTasks);
 router.get("/tasks/overdue/:projectId", taskController.GetOverdueTasks);
 router.get("/projects/:projectId/tasks/statistics", taskController.GetTasksStatistics);
 router.get("/tasks/:taskId", taskController.GetTaskDetail);
@@ -15,5 +17,6 @@ router.patch("/tasks/:taskId", taskController.UpdateTask);
 router.patch("/tasks/:taskId/assignee", taskController.AssignTask);
 router.delete("/tasks/:taskId", taskController.DeleteTask);
 router.patch("/tasks/:taskId/complete", taskController.CompleteTask);
+
 
 module.exports = router;

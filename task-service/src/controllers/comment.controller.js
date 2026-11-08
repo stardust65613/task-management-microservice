@@ -18,7 +18,7 @@ const DeleteComment = async (req, res, next) => {
     try {
         const result = await commentService.DeleteComment(req.user.id, req.params.commentId);
 
-        return res.status(201).json({
+        return res.status(204).json({
             success: true,
             message: "Comment deleted successfully",
             data: result,

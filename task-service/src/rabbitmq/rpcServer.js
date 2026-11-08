@@ -18,10 +18,14 @@ const startRPCServer = async () => {
         let response = null;
 
         switch (request.action) {
-
+            case "GET_USER_TASKS_STATISTICS":
+                response = await taskService.GetUserTasksStatistics(
+                    request.data.userId,
+                    request.data.projectIds
+                );
+                break;
 
             default:
-
                 response = {
                     success: false,
                     message: "Unknown Action"

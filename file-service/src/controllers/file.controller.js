@@ -95,10 +95,38 @@ const DeleteFile = async (req, res, next) => {
     }
 };
 
+const PreviewFile = async (req, res, next) => {
+    try {
+        const { stream, metadata } = await fileService.PreviewFile(
+            req.params.id
+        );
+
+        res.setHeader("Content-Type", metadata.mimeType);
+        res.setHeader(
+            "Content-Disposition",
+            `inline; filename*=UTF-8''${encodeURIComponent(metadata.originalName)}`
+        );
+        res.setHeader("X-Content-Type-Options", "nosniff");
+
+        stream.on("error", (err) => {
+            if (!res.headersSent) {
+                next(err);
+            } else {
+                res.destroy(err);
+            }
+        });
+
+        stream.pipe(res);
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     DownloadFile,
     UploadFile,
     GetFile,
     UpdateFile,
     DeleteFile,
+    PreviewFile,
 }

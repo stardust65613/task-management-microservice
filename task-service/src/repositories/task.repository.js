@@ -18,8 +18,41 @@ async function findById(id) {
     });
 }
 
-async function findByProjectId(projectId) {
-    return prisma.task.findMany({
+const findByProjectId = async (projectId, page = 1, limit = 10) => {
+    const skip = (page - 1) * limit;
+
+    const [tasks, total] = await Promise.all([
+        prisma.task.findMany({
+            where: {
+                projectId,
+            },
+            skip,
+            take: limit,
+            orderBy: {
+                createdAt: "desc",
+            },
+        }),
+
+        prisma.task.count({
+            where: {
+                projectId,
+            },
+        }),
+    ]);
+
+    return {
+        tasks,
+        pagination: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+        },
+    };
+}
+
+const findAllByProjectId = async (projectId) => {
+    return await prisma.task.findMany({
         where: {
             projectId,
         },
@@ -27,7 +60,7 @@ async function findByProjectId(projectId) {
             createdAt: "desc",
         },
     });
-}
+};
 
 async function findByAssigneeId(assigneeId) {
     return prisma.task.findMany({
@@ -248,6 +281,58 @@ async function deleteByProjectId(projectId) {
     });
 }
 
+async function getUserTasksStatistics(projectIds) {
+    const result = await prisma.task.groupBy({
+        by: ["status"],
+        where: {
+            projectId: {
+                in: projectIds,
+            },
+        },
+        _count: {
+            id: true,
+        },
+    });
+
+    const statistics = {
+        totalTasks: 0,
+        todoTasks: 0,
+        inProgressTasks: 0,
+        reviewTasks: 0,
+        completedTasks: 0,
+        cancelledTasks: 0,
+    };
+
+    const statusMap = {
+        TODO: "todoTasks",
+        IN_PROGRESS: "inProgressTasks",
+        REVIEW: "reviewTasks",
+        DONE: "completedTasks",
+        CANCELLED: "cancelledTasks",
+    };
+
+    for (const item of result) {
+        const count = item._count.id;
+
+        statistics.totalTasks += count;
+        statistics[statusMap[item.status]] = count;
+    }
+
+    return statistics;
+}
+
+async function getRecentTasks(assigneeId, limit = 5) {
+    return prisma.task.findMany({
+        where: {
+            assigneeId,
+        },
+        orderBy: {
+            createdAt: "desc",
+        },
+        take: limit,
+    });
+}
+
 module.exports = {
     create,
     findById,
@@ -262,4 +347,7 @@ module.exports = {
     getOverdueTasks,
     getTaskStatistics,
     deleteByProjectId,
+    findAllByProjectId,
+    getUserTasksStatistics,
+    getRecentTasks,
 };

@@ -194,7 +194,7 @@ const GetMembersOfProject = async (id, projectId) => {
 
     console.log(response);
 
-    const users = response.data;
+    const users = response.users;
 
     const userMap = new Map(
         users.map(user => [user.id, user])
@@ -208,12 +208,8 @@ const GetMembersOfProject = async (id, projectId) => {
     return result;
 };
 
-const GetCollabProject = async (id, userId) => {
-    if (!userId){
-        throw new Error("Invaid user Id");
-    }
-
-    return await projectMemberRepository.GetCollabProject(id, userId);
+const GetCollabProject = async (id) => {
+    return await projectMemberRepository.GetCollabProject(id);
 };
 
 const CheckProjectMembers = async (projectId, userIds) => {
