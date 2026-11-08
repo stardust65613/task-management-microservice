@@ -158,6 +158,41 @@ const ChangePassword = async (id, data) => {
     return await userRepository.updateUser(id, { password: hashedPassword, });
 };
 
+const GetUserDashboardStatistics = async (userId) => {
+    if (!userId) {
+        throw new Error("userId must not be null");
+    }
+
+    const { projectIds } = await request("project.rpc", {
+        action: "GET_USER_PROJECT_IDS",
+        data: {
+            userId,
+        },
+    });
+
+    const [projectStats, taskStats] = await Promise.all([
+        request("project.rpc", {
+            action: "GET_PROJECT_STATISTICS",
+            data: {
+                userId,
+            },
+        }),
+
+        request("task.rpc", {
+            action: "GET_USER_TASKS_STATISTICS",
+            data: {
+                userId,
+                projectIds,
+            },
+        }),
+    ]);
+
+    return {
+        ...projectStats,
+        ...taskStats,
+    };
+};
+
 module.exports = {
     GetMyInformation,
     GetUserInformation,
@@ -168,4 +203,5 @@ module.exports = {
     DeleteUser,
     ChangePassword,
     GetUserInfoByEmail,
+    GetUserDashboardStatistics,
 }

@@ -26,6 +26,10 @@ export function getUserInfo(userId) {
   return api.get(`/users/${userId}`);
 }
 
+export function getUserStatistic() {
+  return api.get("/users/statistic");
+}
+
 export function changePassword(data){
   return api.patch("/users/change-password", data);
 }

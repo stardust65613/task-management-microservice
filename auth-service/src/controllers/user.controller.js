@@ -98,6 +98,22 @@ const ChangePassword = async (req, res, next) => {
     }
 };
 
+const GetUserDashboardStatistics = async (req, res, next) => {
+    try {
+        const result = await userService.GetUserDashboardStatistics(
+            req.user.id
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Get user's dashboard statistics successfully",
+            data: result,
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
 module.exports = {
     GetMyInfo,
     GetUserInfo,
@@ -106,4 +122,5 @@ module.exports = {
     DeleteUser,
     ChangePassword,
     GetUserInfoByEmail,
+    GetUserDashboardStatistics,
 }

@@ -40,6 +40,10 @@ export function getMyTasks(params = {}) {
   return api.get("/tasks/my", { params });
 }
 
+export function getRecentTasks(params = {}) {
+  return api.get("/tasks/recent", { params });
+}
+
 // Get overdue tasks in a project
 export function getOverdueTasks(projectId) {
   return api.get(`/tasks/overdue/${projectId}`);

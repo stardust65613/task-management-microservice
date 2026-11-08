@@ -505,6 +505,69 @@ const CompleteTask = async (id, taskId) => {
     return updatedTask;
 };
 
+const GetUserTasksStatistics = async (userId, projectIds) => {
+    if (!userId) {
+        throw new Error("userId must not be null");
+    }
+
+    if (!Array.isArray(projectIds)) {
+        throw new Error("projectIds must be an array");
+    }
+
+    // Không có project thì không có task thuộc các project đó
+    if (projectIds.length === 0) {
+        return {
+            totalTasks: 0,
+            todoTasks: 0,
+            inProgressTasks: 0,
+            reviewTasks: 0,
+            completedTasks: 0,
+            cancelledTasks: 0,
+        };
+    }
+
+    return await taskRepository.getUserTasksStatistics(projectIds);
+};
+
+const GetRecentTasks = async (assigneeId, limit = 5) => {
+    if (!assigneeId) {
+        throw new Error("assigneeId must not be null");
+    }
+
+    const tasks = await taskRepository.getRecentTasks(
+        assigneeId,
+        limit
+    );
+
+    const projectCache = new Map();
+
+    return await Promise.all(
+        tasks.map(async (task) => {
+            let project = projectCache.get(task.projectId);
+
+            if (!project) {
+                project = await request("project.rpc", {
+                    action: "GET_PROJECT_INFO",
+                    data: {
+                        projectId: task.projectId,
+                        userId: assigneeId,
+                    },
+                });
+
+                projectCache.set(task.projectId, project);
+            }
+
+            return {
+                ...task,
+                project: {
+                    id: project.id,
+                    name: project.name,
+                },
+            };
+        })
+    );
+};
+
 module.exports = {
     CreateTask,
     GetTasksByProject,
@@ -520,4 +583,6 @@ module.exports = {
     GetTasksStatistics,
     CompleteTask,
     GetAllTasksByProject,
+    GetUserTasksStatistics,
+    GetRecentTasks,
 }

@@ -207,6 +207,23 @@ const getAllTasksByProject = async (req, res) => {
     }
 };
 
+const GetRecentTasks = async (req, res, next) => {
+    try {
+        const result = await taskService.GetRecentTasks(
+            req.user.id,
+            Number(req.query.limit) || 5
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Get recent tasks successfully",
+            data: result,
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
 module.exports = {
     CreateTask,
     GetTasksByProject,
@@ -221,4 +238,5 @@ module.exports = {
     GetTasksStatistics,
     CompleteTask,
     getAllTasksByProject,
+    GetRecentTasks,
 }

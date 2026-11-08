@@ -135,6 +135,22 @@ const DeleteProjectsByOwner = async (ownerId) => {
     }
 };
 
+const GetProjectStatistics = async (userId) => {
+    if (!userId) {
+        throw new Error("userId must not be null");
+    }
+
+    return await projectRepository.getProjectStatistics(userId);
+};
+
+const GetUserProjectIds = async (userId) => {
+    if (!userId) {
+        throw new Error("userId must not be null");
+    }
+
+    return await projectRepository.getUserProjectIds(userId);
+};
+
 module.exports = {
     CreateProject,
     UpdateProject,
@@ -142,4 +158,6 @@ module.exports = {
     GetProject,
     DeleteProject,
     DeleteProjectsByOwner,
+    GetProjectStatistics,
+    GetUserProjectIds,
 }

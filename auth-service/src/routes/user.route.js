@@ -10,6 +10,8 @@ router.get("/me", authenticate, userController.GetMyInfo);
 
 router.get("/info", authenticate, userController.GetUserInfoByEmail);
 
+router.get("/statistic", authenticate, userController.GetUserDashboardStatistics);
+
 router.get("/:id", authenticate, userController.GetUserInfo);
 
 router.put("/me", authenticate, userController.EditInformation);
