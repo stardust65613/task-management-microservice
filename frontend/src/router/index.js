@@ -16,6 +16,7 @@ import ProjectTaskView from "@/views/projects/ProjectTaskView.vue";
 import ProjectOverviewView from "@/views/projects/ProjectOverview.vue";
 import TaskDetailView from "@/views/tasks/TaskDetailView.vue";
 import CreateTaskView from "@/views/tasks/CreateTaskView.vue";
+import NotificationView from "@/views/notifications/NotificationView.vue";
 
 import { useAuthStore } from "@/stores/auth.store";
 
@@ -111,6 +112,12 @@ const routes = [
         path: "/tasks/:id",
         name: "TaskDetail",
         component: TaskDetailView,
+      },
+
+      {
+        path: "/notifications",
+        name: "NotificationView",
+        component: NotificationView,
       },
     ],
   },
