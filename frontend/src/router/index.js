@@ -16,6 +16,7 @@ import ProjectTaskView from "@/views/projects/ProjectTaskView.vue";
 import ProjectOverviewView from "@/views/projects/ProjectOverview.vue";
 import TaskDetailView from "@/views/tasks/TaskDetailView.vue";
 import CreateTaskView from "@/views/tasks/CreateTaskView.vue";
+import MyTaskView from "@/views/tasks/MyTaskView.vue";
 import NotificationView from "@/views/notifications/NotificationView.vue";
 
 import { useAuthStore } from "@/stores/auth.store";
@@ -41,6 +42,7 @@ const routes = [
         name: "profile",
         component: ProfileView,
       },
+
       {
         path: "users/:id",
         name: "user-profile",
@@ -53,6 +55,7 @@ const routes = [
         name: "projects",
         component: ProjectListView,
       },
+
       {
         path: "projects/create",
         name: "project-create",
@@ -109,13 +112,13 @@ const routes = [
       },
 
       {
-        path: "/tasks/:id",
-        name: "TaskDetail",
-        component: TaskDetailView,
+        path: "tasks",
+        name: "MyTaskView",
+        component: MyTaskView,
       },
 
       {
-        path: "/notifications",
+        path: "notifications",
         name: "NotificationView",
         component: NotificationView,
       },

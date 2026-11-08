@@ -348,11 +348,45 @@ const GetTasksByAssignee = async (id, projectId, assigneeId) => {
 };
 
 const GetMyTasks = async (assigneeId, filters) => {
-    if(!assigneeId){
+    if (!assigneeId) {
         throw new Error("assigneeId must not be null");
     }
 
-    return await taskRepository.getMyTasks(assigneeId, filters);
+    const tasks = await taskRepository.getMyTasks(assigneeId, filters);
+
+    const tasksWithProject = await Promise.all(
+        tasks.map(async (task) => {
+            try {
+                const project = await request("project.rpc", {
+                    action: "GET_PROJECT_INFO",
+                    data: {
+                        projectId: task.projectId,
+                        userId: assigneeId,
+                    },
+                });
+
+                return {
+                    ...task,
+                    project: {
+                        id: project.id,
+                        name: project.name,
+                    },
+                };
+            } catch (error) {
+                console.error(
+                    `Failed to get project info for task ${task.id}:`,
+                    error
+                );
+
+                return {
+                    ...task,
+                    project: null,
+                };
+            }
+        })
+    );
+
+    return tasksWithProject;
 };
 
 const GetOverdueTasks = async (id, projectId) => {

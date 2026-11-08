@@ -1,4 +1,3 @@
-
 import { defineStore } from "pinia";
 import * as taskService from "@/services/task.service";
 import * as fileService from "@/services/file.service";
