@@ -1,13 +1,12 @@
 # Task Management Microservice
 
-A Task Management System built with **Node.js, Express, Vue 3, PostgreSQL, Prisma, Redis, RabbitMQ, Docker, and Microservice Architecture**.
+A Task Management System built with Node.js, Express.js, Vue 3, PostgreSQL, Prisma, Redis, RabbitMQ, Docker, and Microservice Architecture.
 
 ---
 
 ## Tech Stack
 
 ### Backend
-
 - Node.js
 - Express.js
 - Prisma ORM
@@ -17,10 +16,7 @@ A Task Management System built with **Node.js, Express, Vue 3, PostgreSQL, Prism
 - RabbitMQ
 - Docker
 
----
-
 ### Frontend
-
 - Vue 3
 - Vite
 - Vue Router
@@ -32,136 +28,109 @@ A Task Management System built with **Node.js, Express, Vue 3, PostgreSQL, Prism
 
 ## Architecture
 
-gateway
-↓
-auth-service
-↓
-project-service
-↓
-task-service
-↓
-notification-service
-↓
-file-service
+Client
+  |
+  v
+API Gateway
+  |
+  +-- Auth Service
+  +-- Project Service
+  +-- Task Service
+  +-- Notification Service
+  +-- File Service
 
 ---
 
 ## Project Structure
 
 task-management/
-
 ├── gateway/
-
 ├── auth-service/
-
 ├── project-service/
-
 ├── task-service/
-
 ├── notification-service/
-
 ├── file-service/
-
 ├── frontend/
-
 ├── scripts/
-
 ├── docker-compose.yml
-
 └── README.md
 
 ---
 
 ## Services
 
-### Gateway
-
+### 1. Gateway
 - API Gateway
 - Authentication Middleware
 - Rate Limiting
 - Reverse Proxy
 
----
-
-### Auth Service
-
-- Login
-- Register
-- JWT
+### 2. Auth Service
+- User Registration & Login
+- JWT Authentication
 - Refresh Token
-- Role & Permission
+- Role & Permission Management
 
----
-
-### Project Service
-
-- CRUD Project
-- Members
+### 3. Project Service
+- Project CRUD
+- Project Members Management
 - Project Settings
 
----
+### 4. Task Service
+- Task CRUD
+- Kanban Board
+- Comments
+- Labels
+- Attachments
 
-### Task Service
-
-- CRUD Task
-- Kanban
-- Comment
-- Label
-- Attachment
-
----
-
-### Notification Service
-
-- Email
+### 5. Notification Service
+- Email Notifications
 - WebSocket
 - RabbitMQ Consumer
 
----
-
-### File Service
-
-- Upload File
-- Download File
+### 6. File Service
+- File Upload & Download
 - Image Management
 
 ---
 
 ## Database
 
-Each service owns its own database.
+Each microservice owns and manages its own database to ensure service independence.
 
-auth_db
-
-project_db
-
-task_db
-
-notification_db
-
-file_db
+| Service | Database |
+|---|---|
+| Auth Service | auth_db |
+| Project Service | project_db |
+| Task Service | task_db |
+| Notification Service | notification_db |
+| File Service | file_db |
 
 ---
 
-## Run Project
+## Getting Started
 
-Install packages
+### 1. Install Dependencies
 
 npm install
 
-Start docker
+### 2. Start Docker Services
 
 docker compose up -d
 
-Run migration
+### 3. Run Database Migrations
+
+Run Prisma migrations for each service that has a Prisma schema:
 
 npx prisma migrate dev
 
-Start backend
+### 4. Start Backend Services
+
+Run the development command in each backend service:
 
 npm run dev
 
-Start frontend
+### 5. Start Frontend
 
 npm run dev
 
@@ -169,34 +138,23 @@ npm run dev
 
 ## Default Ports
 
-Gateway : 3000
-
-Auth : 3001
-
-Project : 3002
-
-Task : 3003
-
-Notification : 3004
-
-File : 3005
-
-Frontend : 5173
-
-PostgreSQL : 5432
-
-Redis : 6379
-
-RabbitMQ : 5672
-
-RabbitMQ Dashboard : 15672
-
-MinIO API : 9000
-
-MinIO Console : 9001
+| Service | Port |
+|---|---:|
+| API Gateway | 3000 |
+| Auth Service | 3001 |
+| Project Service | 3002 |
+| Task Service | 3003 |
+| Notification Service | 3004 |
+| File Service | 3005 |
+| Frontend (Vite) | 5173 |
+| PostgreSQL | 5432 |
+| Redis | 6379 |
+| RabbitMQ | 5672 |
+| RabbitMQ Management Dashboard | 15672 |
+| RustFS API | 9000 |
+| RustFS Console | 9001 |
 
 ---
 
 ## Author
 
-Intern Project
