@@ -108,6 +108,14 @@ async function GetAllProjectsJoined(userId){
     return projects;
 }
 
+async function GetOwnProjects(userId) {
+    return await prisma.project.findMany({
+        where: {
+            ownerId: userId,
+        },
+    });
+}
+
 async function getProjectStatistics(userId) {
     const totalProjects = await prisma.projectMember.count({
         where: {
@@ -146,4 +154,5 @@ module.exports = {
     GetAllProjectsJoined,
     getProjectStatistics,
     getUserProjectIds,
+    GetOwnProjects,
 };

@@ -80,9 +80,7 @@ const UpdateProject = async (id, projectId, data) => {
 };
 
 const GetProjectsByUser = async (id) => {
-    const project = await projectRepository.GetAllProjectsJoined(id);
-
-    return project;
+    return await projectRepository.GetOwnProjects(id);
 };
 
 const GetProject = async (id, projectId) => {
