@@ -1,0 +1,38 @@
+name: Node.js CI
+description: Install dependencies, run tests and build Node.js service
+
+inputs:
+  service:
+    description: Service directory
+    required: true
+
+  node-version:
+    description: Node.js version
+    required: false
+    default: '22'
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: npm
+        cache-dependency-path: ${{ inputs.service }}/package-lock.json
+
+    - name: Install Dependencies
+      shell: bash
+      working-directory: ${{ inputs.service }}
+      run: npm ci
+
+    - name: Run Tests
+      shell: bash
+      working-directory: ${{ inputs.service }}
+      run: npm test --if-present
+
+    - name: Build
+      shell: bash
+      working-directory: ${{ inputs.service }}
+      run: npm run build --if-present
+      
