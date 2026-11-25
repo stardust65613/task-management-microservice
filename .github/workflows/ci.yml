@@ -1,4 +1,4 @@
-name: Microservices CI/CD
+name: CI
 
 on:
   push:
@@ -91,4 +91,34 @@ jobs:
             echo "PASSED: All triggered services passed their CI checks."
             exit 0
           fi
+          
+  docker-build-push:
+    name: Docker Build & Push - ${{ matrix.service }}
+    runs-on: ubuntu-latest
+
+    needs:
+      - filter-changes
+      - ci-gate
+
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      needs.filter-changes.outputs.services != '[]'
+
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        service: ${{ fromJSON(needs.filter-changes.outputs.services) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build and Publish Docker Image
+        uses: ./.github/actions/docker-build-push
+        with:
+          service: ${{ matrix.service }}
+          registry: ghcr.io
+          image-prefix: task-management
           

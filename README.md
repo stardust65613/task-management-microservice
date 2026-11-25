@@ -141,20 +141,45 @@ Cập nhật các thông tin cấu hình và credentials cần thiết trong fil
 
 Sử dụng Docker Compose để khởi chạy toàn bộ hệ thống:
 
+**Development:**
+
 ```bash
-docker compose up -d --build
+docker compose -f docker-compose.yml up -d --build
+```
+
+**Production:**
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ```
 
 ### 4. Kiểm tra trạng thái
 
+**Development**
+
 ```bash
-docker compose ps
+docker compose -f docker-compose.yml ps
+```
+
+**Production:**
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml ps
 ```
 
 Xem logs:
 
+**Development**
+
 ```bash
-docker compose logs -f
+docker compose -f docker-compose.yml logs -f
+```
+
+**Production:**
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f
 ```
 
 ### 5. Truy cập ứng dụng
@@ -168,8 +193,16 @@ docker compose logs -f
 
 ### 6. Dừng dự án
 
+**Development**
+
 ```bash
-docker compose down
+docker compose -f docker-compose.yml down
+```
+
+**Production:**
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml down
 ```
 
 > Lưu ý: Không sử dụng `docker compose down -v` nếu muốn giữ lại dữ liệu trong Docker volumes.
