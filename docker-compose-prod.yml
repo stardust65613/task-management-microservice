@@ -1,0 +1,57 @@
+services:
+  gateway:
+    image: ghcr.io/${GITHUB_OWNER}/task-management-gateway:${IMAGE_TAG:-latest}
+    build: !reset null
+    volumes: !reset []
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+
+  auth-service:
+    image: ghcr.io/${GITHUB_OWNER}/task-management-auth-service:${IMAGE_TAG:-latest}
+    build: !reset null
+    volumes: !reset []
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+
+  project-service:
+    image: ghcr.io/${GITHUB_OWNER}/task-management-project-service:${IMAGE_TAG:-latest}
+    build: !reset null
+    volumes: !reset []
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+
+  task-service:
+    image: ghcr.io/${GITHUB_OWNER}/task-management-task-service:${IMAGE_TAG:-latest}
+    build: !reset null
+    volumes: !reset []
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+
+  notification-service:
+    image: ghcr.io/${GITHUB_OWNER}/task-management-notification-service:${IMAGE_TAG:-latest}
+    build: !reset null
+    volumes: !reset []
+    restart: unless-stopped
+    ports:
+      - "3004:3004"
+
+  file-service:
+    image: ghcr.io/${GITHUB_OWNER}/task-management-file-service:${IMAGE_TAG:-latest}
+    build: !reset null
+    volumes: !reset []
+    restart: unless-stopped
+    ports:
+      - "3005:3005"
+
+  frontend:
+    image: ghcr.io/${GITHUB_OWNER}/task-management-frontend:${IMAGE_TAG:-latest}
+    build: !reset null
+    volumes: !reset []
+    restart: unless-stopped
+    ports: !reset
+      - "8080:80"
+      

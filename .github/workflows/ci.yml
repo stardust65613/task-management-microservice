@@ -1,0 +1,124 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+
+  pull_request:
+    branches: [main, dev]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  filter-changes:
+    name: Filter Changed Paths
+    runs-on: ubuntu-latest
+
+    outputs:
+      services: ${{ steps.filter-services.outputs.changes }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Filter Changed Services
+        id: filter-services
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            gateway:
+              - 'gateway/**'
+
+            auth-service:
+              - 'auth-service/**'
+
+            project-service:
+              - 'project-service/**'
+
+            task-service:
+              - 'task-service/**'
+
+            notification-service:
+              - 'notification-service/**'
+
+            file-service:
+              - 'file-service/**'
+
+            frontend:
+              - 'frontend/**'
+
+  service-ci:
+    name: CI - ${{ matrix.service }}
+    needs: filter-changes
+
+    if: needs.filter-changes.outputs.services != '[]'
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJSON(needs.filter-changes.outputs.services) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js CI
+        uses: ./.github/actions/node-ci
+        with:
+          service: ${{ matrix.service }}
+          node-version: '22'
+
+  ci-gate:
+    name: CI Gate Passed
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - filter-changes
+      - service-ci
+
+    steps:
+      - name: Check Status of All Triggered Services
+        shell: bash
+        run: |
+          if [[ "${{ contains(needs.*.result, 'failure') }}" == "true" || "${{ contains(needs.*.result, 'cancelled') }}" == "true" ]]; then
+            echo "FAILED: One or more services failed their CI checks."
+            exit 1
+          else
+            echo "PASSED: All triggered services passed their CI checks."
+            exit 0
+          fi
+          
+  docker-build-push:
+    name: Docker Build & Push - ${{ matrix.service }}
+    runs-on: ubuntu-latest
+
+    needs:
+      - filter-changes
+      - ci-gate
+
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      needs.filter-changes.outputs.services != '[]'
+
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        service: ${{ fromJSON(needs.filter-changes.outputs.services) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build and Publish Docker Image
+        uses: ./.github/actions/docker-build-push
+        with:
+          service: ${{ matrix.service }}
+          registry: ghcr.io
+          image-prefix: task-management
+          

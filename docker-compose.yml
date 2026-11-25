@@ -2,7 +2,9 @@ version: "3.9"
 
 services:
   gateway:
-    build: ./gateway
+    build:
+      context: ./gateway
+      target: development
     depends_on:
     - postgres
     - rabbitmq
@@ -18,7 +20,9 @@ services:
       - /app/node_modules
 
   auth-service:
-    build: ./auth-service
+    build: 
+      context: ./auth-service
+      target: development
     depends_on:
     - postgres
     - rabbitmq
@@ -34,7 +38,9 @@ services:
       - /app/node_modules
 
   project-service:
-    build: ./project-service
+    build: 
+      context: ./project-service
+      target: development
     depends_on:
     - postgres
     - rabbitmq
@@ -50,7 +56,9 @@ services:
       - /app/node_modules
 
   task-service:
-    build: ./task-service
+    build: 
+      context: ./task-service
+      target: development
     depends_on:
     - postgres
     - rabbitmq
@@ -66,7 +74,9 @@ services:
       - /app/node_modules
 
   file-service:
-    build: ./file-service
+    build:
+      context: ./file-service
+      target: development
     depends_on:
     - postgres
     - rabbitmq
@@ -82,7 +92,9 @@ services:
       - /app/node_modules
 
   notification-service:
-    build: ./notification-service
+    build: 
+      context: ./notification-service
+      target: development
     depends_on:
     - postgres
     - rabbitmq
